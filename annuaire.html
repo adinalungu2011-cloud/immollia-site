@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Annuaire des membres · IMMOLLIA</title>
+<meta name="description" content="L'annuaire public des membres de la communauté IMMOLLIA : des professionnelles de l'immobilier à contacter, par ville et par spécialité.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@500;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+
+<div class="preview-bar" role="note">
+  <div class="wrap">
+    <span><b>Prévisualisation, version 11.</b> Site non publié.</span>
+    <button type="button" id="toggle-notes" aria-pressed="true">Masquer les notes</button>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="index.html" class="brand" aria-label="IMMOLLIA, accueil">
+      <img src="assets/logo-immollia.png" alt="IMMOLLIA" width="142" height="46">
+    </a>
+    <button type="button" class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="nav">Menu</button>
+    <nav class="nav" id="nav" aria-label="Navigation principale">
+      <a href="index.html#piliers">La communauté</a>
+      <a href="index.html#histoire">Notre histoire</a>
+      <a href="zone-de-genie.html">Zone de Génie</a>
+      <a href="annuaire.html" aria-current="page">Annuaire</a>
+      <a href="index.html#agenda">Agenda</a>
+      <a href="index.html#presse">Ils parlent de nous</a>
+      <a href="index.html#rejoindre" class="btn btn--primary">Rejoindre</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="page-head">
+      <p class="breadcrumb"><a href="index.html">Accueil</a> › Annuaire</p>
+      <span class="label">Rayonner</span>
+      <h1>L'annuaire des membres</h1>
+      <p class="lead">Les professionnelles de la communauté IMMOLLIA, à retrouver par nom, agence, ville ou spécialité. Une question sur le métier, sur la communauté ? Les membres fondatrices vous répondent : écrivez-leur depuis leur fiche ou via <a href="index.html#rejoindre">le formulaire</a>.</p>
+      <span class="pv"><b>À fournir :</b> liens LinkedIn des cinq fondatrices (aucun lien reçu, les boutons n'apparaissent qu'une fois renseignés), villes d'Audrey et d'Élodie, présentations d'Élodie et d'Émilie, nom et agence d'Émilie.</span>
+    </div>
+
+    <div class="toolbar" role="search">
+      <input id="dir-search" type="search" placeholder="Rechercher un nom, une agence, une ville…" aria-label="Rechercher dans l'annuaire">
+      <select id="dir-filter" aria-label="Filtrer par spécialité">
+        <option value="">Toutes les spécialités</option>
+      </select>
+    </div>
+    <p class="count" id="dir-count"></p>
+    <div class="directory" id="directory"></div>
+    <div class="empty" id="dir-empty" hidden>Aucun membre ne correspond à cette recherche.</div>
+  </div>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="cta-band">
+        <div>
+          <h2>Vous êtes professionnelle de l'immobilier ?</h2>
+          <p>Rejoignez IMMOLLIA, c'est gratuit, et figurez dans l'annuaire avec votre agence, votre secteur et vos spécialités.</p>
+        </div>
+        <div class="btn-row">
+          <a href="index.html#rejoindre" class="btn btn--on-dark">Figurer dans l'annuaire <span class="arrow" aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap footer-top">
+    <img src="assets/logo-immollia.png" alt="IMMOLLIA" width="136" height="44">
+    <nav aria-label="Liens de bas de page">
+      <a href="index.html#piliers">La communauté</a>
+      <a href="index.html#histoire">Notre histoire</a>
+      <a href="zone-de-genie.html">Zone de Génie</a>
+      <a href="annuaire.html">Annuaire</a>
+      <a href="index.html#agenda">Agenda</a>
+      <a href="index.html#presse">Ils parlent de nous</a>
+      <a href="index.html#rejoindre">Rejoindre</a>
+    </nav>
+    <div class="footer-contact">
+      <a href="tel:+33660994469">06 60 99 44 69</a>
+      <a href="mailto:contact@immollia.fr">contact@immollia.fr</a>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <span>IMMOLLIA, association loi 1901 · Inspirer. Fédérer. Rayonner.</span>
+    <nav aria-label="Informations légales">
+      <a href="#" title="À compléter avant la mise en ligne">Mentions légales</a>
+      <a href="#" title="À compléter avant la mise en ligne">Confidentialité</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="assets/site.js"></script>
+<script>
+(function () {
+  // Membres : liste à compléter. Champs facultatifs : ville, specialites, photo, description, site, linkedin, instagram, email, tel.
+  var MEMBERS = [
+    { nom: 'Adina Lungu', agence: 'Adina Immobilier', ville: 'Le Plessis-Robinson (92)', specialites: ['Transaction', 'Location', 'Expertise', 'Formation'], photo: 'assets/portraits/portrait-1.jpg', fondatrice: true,
+      description: 'Arrivée en France en 2017, attachée parlementaire en Roumanie avant de se lancer dans l\'immobilier, elle fonde Adina Immobilier en 2021 au Plessis-Robinson : transaction, location et expertise. Formatrice, engagée dans les instances de la profession. Pour elle, IMMOLLIA est un espace de partage et de soutien entre professionnelles.',
+      site: 'https://adina-immobilier.fr', linkedin: '', instagram: '', email: '', tel: '' },
+    { nom: 'Anne Boucaut-Basso', agence: 'Boucaut Immobilier · Les Toits de Robinson · L\'Agence du Château', ville: 'Région parisienne', specialites: ['Transaction'], photo: 'assets/portraits/portrait-2.jpg', fondatrice: true,
+      description: 'Professionnelle de l\'immobilier depuis 2006, elle fonde Boucaut Immobilier en 2019, Les Toits de Robinson en 2021 et L\'Agence du Château en 2025. Passionnée par le métier et les relations humaines, elle tient à défendre les intérêts des femmes, très présentes dans la profession.',
+      site: '', linkedin: '', instagram: '', email: '', tel: '' },
+    { nom: 'Audrey Morvan', agence: 'Morvan Immobilier', ville: '', specialites: ['Transaction'], photo: 'assets/portraits/portrait-5.jpg', fondatrice: true,
+      description: 'Après un master et plusieurs postes à responsabilité, elle crée une agence artistique dans l\'événementiel et travaille comme présentatrice TV et journaliste. Elle rejoint l\'immobilier fin 2019 et fonde Morvan Immobilier en 2021. Animée par les relations humaines, elle s\'engage pour les femmes entrepreneuses du secteur.',
+      site: '', linkedin: '', instagram: '', email: '', tel: '' },
+    { nom: 'Élodie Maugé', agence: 'Maugé Immobilier', ville: '', specialites: ['Transaction'], photo: 'assets/portraits/portrait-3.jpg', fondatrice: true,
+      description: 'Dirigeante de Maugé Immobilier, elle fait partie des quatre cheffes d\'entreprise réunies sur le plateau du RENT Channel en 2025. Présentation détaillée à venir.',
+      site: '', linkedin: '', instagram: '', email: '', tel: '' },
+    { nom: 'Émilie', agence: '', ville: '', specialites: [], photo: 'assets/portraits/portrait-4.jpg', fondatrice: true,
+      description: 'Membre fondatrice d\'IMMOLLIA. Présentation à venir.',
+      site: '', linkedin: '', instagram: '', email: '', tel: '' }
+  ];
+
+  var list = document.getElementById('directory'), empty = document.getElementById('dir-empty'), count = document.getElementById('dir-count');
+  var search = document.getElementById('dir-search'), filter = document.getElementById('dir-filter');
+
+  var specs = {};
+  MEMBERS.forEach(function (m) { m.specialites.forEach(function (s) { specs[s] = true; }); });
+  Object.keys(specs).sort().forEach(function (s) { var o = document.createElement('option'); o.value = s; o.textContent = s; filter.appendChild(o); });
+
+  var esc = function (t) { return String(t || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var norm = function (t) { return (t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); };
+  var initials = function (n) { return n.split(/\s+/).map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase(); };
+  var link = function (href, label) { return href ? '<a href="' + esc(href) + '" target="_blank" rel="noopener">' + label + '</a>' : ''; };
+
+  function render() {
+    var q = norm(search.value.trim()), f = filter.value;
+    list.innerHTML = '';
+    var shown = MEMBERS.filter(function (m) {
+      var hay = norm([m.nom, m.agence, m.ville, m.description].concat(m.specialites).join(' '));
+      return (!q || hay.indexOf(q) !== -1) && (!f || m.specialites.indexOf(f) !== -1);
+    });
+    shown.forEach(function (m) {
+      var el = document.createElement('article'); el.className = 'member';
+      var photo = m.photo ? '<img src="' + esc(m.photo) + '" alt="" width="64" height="64" loading="lazy">' : '<div class="avatar" aria-hidden="true">' + esc(initials(m.nom)) + '</div>';
+      var meta = [m.ville || 'Ville à compléter'].concat(m.specialites).map(function (t) { return '<span>' + esc(t) + '</span>'; }).join('<span aria-hidden="true">·</span>');
+      var links = [link(m.site, 'Site'), link(m.linkedin, 'LinkedIn'), link(m.instagram, 'Instagram'),
+        m.email ? '<a href="mailto:' + esc(m.email) + '">E-mail</a>' : '', m.tel ? '<a href="tel:' + esc(m.tel.replace(/\s/g, '')) + '">' + esc(m.tel) + '</a>' : ''].filter(Boolean).join('');
+      el.innerHTML = photo + '<div><h3>' + esc(m.nom) + '</h3><p class="agency">' + (esc(m.agence) || 'Agence à compléter') + '</p><p class="meta">' + meta + '</p>'
+        + (m.description ? '<p class="desc">' + esc(m.description) + '</p>' : '')
+        + '<div class="links">' + links + (m.fondatrice ? '<a href="index.html#rejoindre">Poser une question</a>' : '') + '</div>'
+        + (m.fondatrice ? '<span class="tag">Membre fondatrice</span>' : '') + '</div>';
+      list.appendChild(el);
+    });
+    empty.hidden = shown.length > 0;
+    count.textContent = shown.length + (shown.length > 1 ? ' membres' : ' membre') + (q || f ? ' trouvée' + (shown.length > 1 ? 's' : '') : '');
+  }
+  search.addEventListener('input', render);
+  filter.addEventListener('change', render);
+  render();
+})();
+</script>
+</body>
+</html>
