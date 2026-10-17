@@ -1,2 +1,8 @@
 AddDefaultCharset UTF-8
 Options -Indexes
+
+# Toujours servir le site en HTTPS, sur l'adresse www.immollia.fr
+RewriteEngine On
+RewriteCond %{HTTPS} off [OR]
+RewriteCond %{HTTP_HOST} ^immollia\.fr$ [NC]
+RewriteRule ^ https://www.immollia.fr%{REQUEST_URI} [L,R=301]
