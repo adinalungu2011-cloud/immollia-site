@@ -18,6 +18,16 @@ if (!is_file($fichier)) {
     header('Content-Type: text/plain; charset=utf-8');
     exit('Aucune inscription pour le moment.');
 }
+if (isset($_GET['f']) && $_GET['f'] === 'sheets') {
+    // Version pour Google Sheets (=IMPORTDATA) : séparateur virgule, sans BOM ; mise à jour automatique (~1 h).
+    header('Content-Type: text/csv; charset=utf-8');
+    $in = fopen($fichier, 'r'); $out = fopen('php://output', 'w');
+    while (($ligne = fgetcsv($in, 0, ';')) !== false) {
+        if (isset($ligne[0])) $ligne[0] = preg_replace('/^\xEF\xBB\xBF/', '', $ligne[0]);
+        fputcsv($out, $ligne, ',');
+    }
+    exit;
+}
 header('Content-Type: text/csv; charset=utf-8');
 header('Content-Disposition: attachment; filename="inscriptions-immollia-' . date('Y-m-d') . '.csv"');
 header('Content-Length: ' . filesize($fichier));
