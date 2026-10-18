@@ -60,6 +60,12 @@ fputcsv($fh, [date('Y-m-d H:i:s'), $prenom, $nom, $email, $tel, $activite, $sour
 flock($fh, LOCK_UN);
 fclose($fh);
 
+// Lien privé de téléchargement du fichier complet (clé créée une fois, gardée hors du dossier web)
+$cleFichier = $dir . '/cle-export.txt';
+$cle = is_file($cleFichier) ? trim((string)file_get_contents($cleFichier)) : '';
+if ($cle === '') { $cle = bin2hex(random_bytes(16)); @file_put_contents($cleFichier, $cle); @chmod($cleFichier, 0600); }
+$lienFichier = 'https://www.immollia.fr/inscriptions.php?k=' . $cle;
+
 // 2. Prévenir l'équipe par e-mail
 $sujet = 'Nouvelle inscription IMMOLLIA (' . $source . ') : ' . $prenom . ' ' . $nom;
 $corps = "Nouvelle inscription depuis le site IMMOLLIA.\n\n"
@@ -67,7 +73,8 @@ $corps = "Nouvelle inscription depuis le site IMMOLLIA.\n\n"
        . "Activité : " . ($activite ?: '-') . "\nSource : $source\n"
        . "Accepte les actualités : $news\n"
        . ($quand ? "Saisie sur l'appareil le : $quand\n" : '')
-       . "\nÀ faire : l'ajouter à la communauté WhatsApp et lui envoyer le message de bienvenue.\n";
+       . "\nÀ faire : l'ajouter à la communauté WhatsApp et lui envoyer le message de bienvenue.\n"
+       . "\nToutes les inscriptions dans un fichier Excel (lien privé, ne pas le transférer) :\n$lienFichier\n";
 $entetes = "From: IMMOLLIA <contact@immollia.fr>\r\n"
          . "Reply-To: $email\r\n"
          . "MIME-Version: 1.0\r\n"

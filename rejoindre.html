@@ -126,7 +126,8 @@ body { background: var(--soft); }
 
   var form = document.getElementById('join-form'), err = document.getElementById('j-err'), go = document.getElementById('j-go');
   var etapeForm = document.getElementById('etape-form'), etapeOk = document.getElementById('etape-ok');
-  var source = (new URLSearchParams(location.search).get('src') || 'site').replace(/[^a-z0-9_-]/gi, '').slice(0, 30) || 'site';
+  // /rent est réécrit côté serveur : l'adresse affichée reste /rent, sans ?src=
+  var source = (new URLSearchParams(location.search).get('src') || (/^\/rent\/?$/i.test(location.pathname) ? 'rent' : 'site')).replace(/[^a-z0-9_-]/gi, '').slice(0, 30) || 'site';
   var FILE = 'immollia-inscriptions-en-attente';
 
   // File d'attente locale : sur un salon, le réseau peut couper. L'inscription est gardée sur l'appareil
