@@ -45,6 +45,7 @@ body { background: var(--soft); }
 .done { text-align: center; align-items: center; }
 .done h2 { font-size: 1.9rem; }
 .done p { color: var(--ink-soft); }
+.done .rang { font: 800 1.05rem var(--font-display); color: var(--accent); }
 .wa { display: inline-flex; align-items: center; justify-content: center; gap: 0.7rem; width: 100%; padding: 1.1rem 1.4rem; border-radius: 999px; background: #1f9d55; color: #fff; text-decoration: none; font: 800 1.08rem var(--font-display); }
 .wa:hover { background: #17834a; }
 .wa svg { width: 24px; height: 24px; flex: none; }
@@ -57,7 +58,7 @@ body { background: var(--soft); }
 <main class="join">
   <div class="join-top">
     <a href="index.html" aria-label="IMMOLLIA, accueil du site"><img src="assets/logo-immollia.png" alt="IMMOLLIA" width="136" height="44"></a>
-    <span class="live"><i aria-hidden="true"></i><b>47</b> membres</span>
+    <span class="live"><i aria-hidden="true"></i><b id="nb-membres">47</b> membres</span>
   </div>
 
   <section id="etape-form" class="stack" style="gap:1.1rem">
@@ -105,6 +106,7 @@ body { background: var(--soft); }
 
   <section id="etape-ok" class="card done" hidden tabindex="-1">
     <h2 id="ok-titre">Bienvenue !</h2>
+    <p id="ok-rang" class="rang" hidden></p>
     <p>Votre inscription est enregistrée. Dernière étape : rejoignez la communauté IMMOLLIA sur WhatsApp.</p>
     <a id="ok-wa" class="wa" href="#" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/></svg>
@@ -150,8 +152,21 @@ body { background: var(--soft); }
 
   function montrerErreur(t, champ) { err.textContent = t; err.hidden = false; if (champ) champ.focus(); }
 
-  function bienvenue(prenom) {
+  // Compteur de membres : valeur réelle lue sur le serveur (47 reste affiché si le réseau ne répond pas)
+  var nb = document.getElementById('nb-membres');
+  function afficherMembres(n) {
+    n = parseInt(n, 10); if (!n) return;
+    var depart = parseInt(nb.textContent, 10) || n;
+    if (n <= depart) { nb.textContent = n; return; }
+    var i = depart, t = setInterval(function () { nb.textContent = ++i; if (i >= n) clearInterval(t); }, 120);
+  }
+  fetch('membres.php', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) { afficherMembres(j.membres); }, function () {});
+
+  function bienvenue(prenom, membres) {
     document.getElementById('ok-titre').textContent = 'Bienvenue, ' + prenom + ' !';
+    var rang = document.getElementById('ok-rang');
+    if (membres) { rang.textContent = 'Vous êtes la ' + membres + 'e membre de la communauté IMMOLLIA 🎉'; rang.hidden = false; afficherMembres(membres); }
+    else rang.hidden = true;
     var wa = document.getElementById('ok-wa');
     if (WHATSAPP_URL) { wa.href = WHATSAPP_URL; wa.hidden = false; document.getElementById('ok-sanslien').hidden = true; }
     else { wa.hidden = true; document.getElementById('ok-sanslien').hidden = false; }
@@ -175,7 +190,7 @@ body { background: var(--soft); }
     go.disabled = true; go.firstChild.textContent = 'Inscription… ';
     envoyer(data).then(function (r) {
       go.disabled = false; go.firstChild.textContent = 'Je rejoins IMMOLLIA ';
-      if (r.body.ok) return bienvenue(data.prenom);
+      if (r.body.ok) return bienvenue(data.prenom, r.body.membres);
       if (r.status >= 500) { var f = lireFile(); f.push(data); ecrireFile(f); return bienvenue(data.prenom); }
       montrerErreur(r.body.message || 'Une information semble manquante.');
     }, function () {

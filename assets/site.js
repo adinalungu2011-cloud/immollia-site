@@ -67,4 +67,12 @@
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () {});
     });
   });
+
+  // Compteur de membres (accueil) : valeur réelle lue sur le serveur
+  var nbMembres = document.querySelectorAll('[data-membres]');
+  if (nbMembres.length && window.fetch) {
+    fetch('membres.php', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
+      if (j && j.membres) nbMembres.forEach(function (el) { el.textContent = j.membres; });
+    }, function () {});
+  }
 })();

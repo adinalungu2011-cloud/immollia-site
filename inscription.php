@@ -9,9 +9,9 @@
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 
-function reponse($ok, $msg = '', $code = 200) {
+function reponse($ok, $msg = '', $code = 200, $extra = []) {
     http_response_code($code);
-    echo json_encode(['ok' => $ok, 'message' => $msg], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['ok' => $ok, 'message' => $msg] + $extra, JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -82,4 +82,5 @@ $entetes = "From: IMMOLLIA <contact@immollia.fr>\r\n"
          . "Content-Transfer-Encoding: 8bit\r\n";
 @mail('contact@immollia.fr', mb_encode_mimeheader($sujet, 'UTF-8'), $corps, $entetes);
 
-reponse(true);
+require __DIR__ . '/membres-compte.php';
+reponse(true, '', 200, ['membres' => immollia_membres()]);
