@@ -6,3 +6,7 @@ RewriteEngine On
 RewriteCond %{HTTPS} off [OR]
 RewriteCond %{HTTP_HOST} ^immollia\.fr$ [NC]
 RewriteRule ^ https://www.immollia.fr%{REQUEST_URI} [L,R=301]
+
+# Adresses courtes de la page d'inscription (QR code du salon RENT : /rent)
+RewriteRule ^rejoindre/?$ rejoindre.html [L]
+RewriteRule ^rent/?$ rejoindre.html?src=rent [L,QSA]

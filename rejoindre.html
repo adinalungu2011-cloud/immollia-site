@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rejoindre IMMOLLIA</title>
+<meta name="description" content="Femmes de l'immobilier : rejoignez la communauté IMMOLLIA en 30 secondes. Inspirer, fédérer, rayonner.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@500;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+/* Page d'inscription express (QR code du RENT) : une seule colonne, formulaire visible sans défiler sur téléphone. */
+body { background: var(--soft); }
+.join { max-width: 520px; margin-inline: auto; padding: 1.25rem max(16px, env(safe-area-inset-right, 0px)) 2.5rem max(16px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: 1.1rem; }
+.join-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.join-top img { height: 44px; width: auto; display: block; }
+.join-top .live { font-size: 0.85rem; }
+.join-top .live b { font-size: 1.05rem; }
+.join h1 { font-size: clamp(1.9rem, 1.3rem + 3vw, 2.5rem); line-height: 1.08; }
+.join h1 em { font-style: normal; color: var(--accent); }
+.join .intro { color: var(--ink-soft); font-size: 1.02rem; }
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.pills span { font: 700 0.72rem var(--font-display); letter-spacing: 0.14em; text-transform: uppercase; padding: 0.4rem 0.7rem; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); }
+.pills span:nth-child(1) { color: var(--accent); } .pills span:nth-child(2) { color: var(--violet); } .pills span:nth-child(3) { color: var(--prune); }
+.card { background: var(--bg); border: 1px solid var(--line); border-radius: var(--r); padding: 1.25rem; display: flex; flex-direction: column; gap: 0.9rem; }
+.card .field input { font-size: 16px; padding: 0.8rem 0.9rem; } /* 16 px : évite le zoom automatique sur iPhone */
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.two > * { min-width: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.chips label { display: inline-flex; align-items: center; padding: 0.5rem 0.8rem; border: 1.5px solid var(--line); border-radius: 999px; font: 600 0.88rem var(--font-display); cursor: pointer; user-select: none; }
+.chips input { position: absolute; opacity: 0; pointer-events: none; }
+.chips label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.chips label:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+.check { display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.9rem; color: var(--ink-soft); }
+.check input { margin-top: 0.2rem; accent-color: var(--accent); width: 18px; height: 18px; flex: none; }
+.go { width: 100%; font-size: 1.08rem; padding: 1.1rem 1.4rem; }
+.go[disabled] { opacity: 0.6; cursor: wait; }
+.small { font-size: 0.8rem; color: var(--ink-soft); }
+.small a { color: var(--ink-soft); }
+.err { border-radius: 12px; padding: 0.7rem 0.9rem; font-size: 0.92rem; background: var(--accent-soft); color: var(--ink); border: 1px solid var(--accent); }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+/* Écran de bienvenue */
+.done { text-align: center; align-items: center; }
+.done h2 { font-size: 1.9rem; }
+.done p { color: var(--ink-soft); }
+.wa { display: inline-flex; align-items: center; justify-content: center; gap: 0.7rem; width: 100%; padding: 1.1rem 1.4rem; border-radius: 999px; background: #1f9d55; color: #fff; text-decoration: none; font: 800 1.08rem var(--font-display); }
+.wa:hover { background: #17834a; }
+.wa svg { width: 24px; height: 24px; flex: none; }
+.next { display: flex; flex-direction: column; gap: 0.5rem; width: 100%; }
+.next a { text-align: center; }
+@media (max-width: 380px) { .two { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main class="join">
+  <div class="join-top">
+    <a href="index.html" aria-label="IMMOLLIA, accueil du site"><img src="assets/logo-immollia.png" alt="IMMOLLIA" width="136" height="44"></a>
+    <span class="live"><i aria-hidden="true"></i><b>47</b> membres</span>
+  </div>
+
+  <section id="etape-form" class="stack" style="gap:1.1rem">
+    <h1>Femmes de l'immobilier, et si votre réseau devenait votre <em>plus grande force</em> ?</h1>
+    <p class="intro">Rejoignez IMMOLLIA, la communauté des professionnelles de l'immobilier : entraide, retours d'expérience, et le parcours Zone de Génie pour révéler vos forces.</p>
+    <div class="pills" aria-label="Inspirer, fédérer, rayonner"><span>Inspirer</span><span>Fédérer</span><span>Rayonner</span></div>
+
+    <form id="join-form" class="card" novalidate>
+      <div class="two">
+        <div class="field">
+          <label for="j-prenom">Prénom</label>
+          <input id="j-prenom" name="prenom" type="text" autocomplete="given-name" required>
+        </div>
+        <div class="field">
+          <label for="j-nom">Nom</label>
+          <input id="j-nom" name="nom" type="text" autocomplete="family-name" required>
+        </div>
+      </div>
+      <div class="field">
+        <label for="j-email">E-mail</label>
+        <input id="j-email" name="email" type="email" autocomplete="email" inputmode="email" required>
+      </div>
+      <div class="field">
+        <label for="j-tel">Téléphone mobile</label>
+        <input id="j-tel" name="tel" type="tel" autocomplete="tel" inputmode="tel" placeholder="06 12 34 56 78" required>
+        <span class="small">Pour vous ajouter à la communauté WhatsApp.</span>
+      </div>
+      <div class="field">
+        <span style="font:700 0.9rem var(--font-display)">Vous êtes <span class="small">(facultatif)</span></span>
+        <div class="chips">
+          <label><input type="radio" name="activite" value="Négociatrice">Négociatrice</label>
+          <label><input type="radio" name="activite" value="Mandataire">Mandataire</label>
+          <label><input type="radio" name="activite" value="Dirigeante d'agence">Dirigeante</label>
+          <label><input type="radio" name="activite" value="Gestion / syndic">Gestion, syndic</label>
+          <label><input type="radio" name="activite" value="Autre">Autre</label>
+        </div>
+      </div>
+      <label class="check"><input type="checkbox" name="news" value="1" id="j-news"> Je souhaite recevoir les actualités d'IMMOLLIA : lives, événements, ouverture du parcours Zone de Génie.</label>
+      <div class="hp" aria-hidden="true"><label for="j-site">Ne pas remplir</label><input id="j-site" name="site" type="text" tabindex="-1" autocomplete="off"></div>
+      <div id="j-err" class="err" role="alert" hidden></div>
+      <button type="submit" class="btn btn--primary go" id="j-go">Je rejoins IMMOLLIA <span class="arrow" aria-hidden="true">→</span></button>
+      <p class="small">Gratuit, sans engagement. Vos coordonnées servent uniquement à vous accueillir dans la communauté et à vous tenir informée ; elles ne sont jamais cédées. Pour les modifier ou les supprimer : contact@immollia.fr.</p>
+    </form>
+  </section>
+
+  <section id="etape-ok" class="card done" hidden tabindex="-1">
+    <h2 id="ok-titre">Bienvenue !</h2>
+    <p>Votre inscription est enregistrée. Dernière étape : rejoignez la communauté IMMOLLIA sur WhatsApp.</p>
+    <a id="ok-wa" class="wa" href="#" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/></svg>
+      Rejoindre la communauté WhatsApp
+    </a>
+    <p id="ok-sanslien" class="small" hidden>Nous vous ajoutons à la communauté WhatsApp sous 24 heures, au numéro que vous avez indiqué.</p>
+    <div class="next">
+      <a href="zone-de-genie.html#exercice" class="btn btn--ghost">Faire le premier pas Zone de Génie</a>
+      <a href="index.html" class="btn btn--ghost">Découvrir IMMOLLIA</a>
+    </div>
+    <button type="button" class="btn btn--ghost" id="ok-autre" style="font-size:0.85rem">Inscrire une autre personne</button>
+  </section>
+</main>
+
+<script>
+(function () {
+  // Lien d'invitation à la communauté WhatsApp IMMOLLIA (à renseigner). Vide = message « nous vous ajoutons sous 24 h ».
+  var WHATSAPP_URL = 'https://chat.whatsapp.com/Djf761IEdpFA8f8ASbIshz';
+
+  var form = document.getElementById('join-form'), err = document.getElementById('j-err'), go = document.getElementById('j-go');
+  var etapeForm = document.getElementById('etape-form'), etapeOk = document.getElementById('etape-ok');
+  var source = (new URLSearchParams(location.search).get('src') || 'site').replace(/[^a-z0-9_-]/gi, '').slice(0, 30) || 'site';
+  var FILE = 'immollia-inscriptions-en-attente';
+
+  // File d'attente locale : sur un salon, le réseau peut couper. L'inscription est gardée sur l'appareil
+  // et renvoyée automatiquement dès que la connexion revient.
+  function lireFile() { try { return JSON.parse(localStorage.getItem(FILE) || '[]'); } catch (e) { return []; } }
+  function ecrireFile(f) { try { localStorage.setItem(FILE, JSON.stringify(f)); } catch (e) {} }
+  function envoyer(data) {
+    return fetch('inscription.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+      .then(function (r) { return r.json().then(function (j) { return { status: r.status, body: j }; }); });
+  }
+  function viderFile() {
+    var f = lireFile(); if (!f.length || !navigator.onLine) return;
+    var reste = [];
+    Promise.all(f.map(function (d) {
+      return envoyer(d).then(function (r) { if (!r.body.ok && r.status >= 500) reste.push(d); }, function () { reste.push(d); });
+    })).then(function () { ecrireFile(reste); });
+  }
+  window.addEventListener('online', viderFile);
+  viderFile();
+
+  function montrerErreur(t, champ) { err.textContent = t; err.hidden = false; if (champ) champ.focus(); }
+
+  function bienvenue(prenom) {
+    document.getElementById('ok-titre').textContent = 'Bienvenue, ' + prenom + ' !';
+    var wa = document.getElementById('ok-wa');
+    if (WHATSAPP_URL) { wa.href = WHATSAPP_URL; wa.hidden = false; document.getElementById('ok-sanslien').hidden = true; }
+    else { wa.hidden = true; document.getElementById('ok-sanslien').hidden = false; }
+    etapeForm.hidden = true; etapeOk.hidden = false; etapeOk.focus(); window.scrollTo(0, 0);
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault(); err.hidden = true;
+    var g = function (n) { var el = form.elements[n]; return el ? String(el.value || '').trim() : ''; };
+    var data = {
+      prenom: g('prenom'), nom: g('nom'), email: g('email'), tel: g('tel'),
+      activite: (form.querySelector('input[name="activite"]:checked') || {}).value || '',
+      news: form.elements.news.checked ? 1 : 0, site: g('site'), source: source,
+      quand: new Date().toLocaleString('fr-FR')
+    };
+    if (!data.prenom) return montrerErreur('Merci d\'indiquer votre prénom.', form.elements.prenom);
+    if (!data.nom) return montrerErreur('Merci d\'indiquer votre nom.', form.elements.nom);
+    if (!form.elements.email.checkValidity() || !data.email) return montrerErreur('L\'adresse e-mail semble incomplète.', form.elements.email);
+    if (data.tel.replace(/\D/g, '').length < 9) return montrerErreur('Le numéro de téléphone semble incomplet.', form.elements.tel);
+
+    go.disabled = true; go.firstChild.textContent = 'Inscription… ';
+    envoyer(data).then(function (r) {
+      go.disabled = false; go.firstChild.textContent = 'Je rejoins IMMOLLIA ';
+      if (r.body.ok) return bienvenue(data.prenom);
+      if (r.status >= 500) { var f = lireFile(); f.push(data); ecrireFile(f); return bienvenue(data.prenom); }
+      montrerErreur(r.body.message || 'Une information semble manquante.');
+    }, function () {
+      // Pas de réseau : on garde l'inscription sur l'appareil, elle partira dès le retour de la connexion.
+      go.disabled = false; go.firstChild.textContent = 'Je rejoins IMMOLLIA ';
+      var f = lireFile(); f.push(data); ecrireFile(f); bienvenue(data.prenom);
+    });
+  });
+
+  // Tablette du stand : repartir d'un formulaire vide pour la personne suivante.
+  document.getElementById('ok-autre').addEventListener('click', function () {
+    form.reset(); err.hidden = true; etapeOk.hidden = true; etapeForm.hidden = false; form.elements.prenom.focus();
+  });
+})();
+</script>
+</body>
+</html>
