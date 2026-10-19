@@ -40,7 +40,7 @@
       <p class="breadcrumb"><a href="index.html">Accueil</a> › Annuaire</p>
       <span class="label">Rayonner</span>
       <h1>L'annuaire des membres</h1>
-      <p class="lead">Les professionnelles de la communauté IMMOLLIA, à retrouver par nom, agence, ville ou spécialité. Une question sur le métier, sur la communauté ? Les membres fondatrices vous répondent : écrivez-leur depuis leur fiche ou via <a href="index.html#rejoindre">le formulaire</a>.</p>
+      <p class="lead">Les professionnelles de la communauté IMMOLLIA, à retrouver par nom, agence, ville ou spécialité. Une question sur le métier, sur la communauté ? Les membres fondatrices vous répondent : ouvrez leur fiche pour découvrir leur parcours et les contacter, ou via <a href="index.html#rejoindre">le formulaire</a>.</p>
     </div>
 
     <div class="toolbar" role="search">
@@ -96,56 +96,35 @@
 </footer>
 
 <script src="assets/site.js"></script>
+<script src="assets/membres.js"></script>
 <script>
 (function () {
-  // Membres : liste à compléter. Champs facultatifs : ville, specialites, photo, description, site, linkedin, instagram, email, tel.
-  var MEMBERS = [
-    { nom: 'Adina Lungu', agence: 'Adina Immobilier', ville: 'Le Plessis-Robinson (92)', specialites: ['Transaction', 'Location', 'Expertise', 'Formation'], photo: 'assets/portraits/portrait-1.jpg', fondatrice: true,
-      description: 'Arrivée en France en 2017, attachée parlementaire en Roumanie avant de se lancer dans l\'immobilier, elle fonde Adina Immobilier en 2021 au Plessis-Robinson : transaction, location et expertise. Formatrice, engagée dans les instances de la profession. Pour elle, IMMOLLIA est un espace de partage et de soutien entre professionnelles.',
-      site: 'https://adina-immobilier.fr', linkedin: '', instagram: '', email: '', tel: '' },
-    { nom: 'Anne Boucaut-Basso', agence: 'Boucaut Immobilier · Les Toits de Robinson · L\'Agence du Château', ville: 'Région parisienne', specialites: ['Transaction'], photo: 'assets/portraits/portrait-2.jpg', fondatrice: true,
-      description: 'Professionnelle de l\'immobilier depuis 2006, elle fonde Boucaut Immobilier en 2019, Les Toits de Robinson en 2021 et L\'Agence du Château en 2025. Passionnée par le métier et les relations humaines, elle tient à défendre les intérêts des femmes, très présentes dans la profession.',
-      site: '', linkedin: '', instagram: '', email: '', tel: '' },
-    { nom: 'Audrey Morvan', agence: 'Morvan Immobilier', ville: 'Ouest parisien', specialites: ['Transaction'], photo: 'assets/portraits/portrait-5.jpg', fondatrice: true,
-      description: 'Après un master et plusieurs postes à responsabilité, elle crée une agence artistique dans l\'événementiel et travaille comme présentatrice TV et journaliste. Elle rejoint l\'immobilier fin 2019 et fonde Morvan Immobilier en 2021, dans l\'Ouest parisien. Animée par les relations humaines, elle s\'engage pour les femmes entrepreneuses du secteur.',
-      site: '', linkedin: '', instagram: '', email: '', tel: '' },
-    { nom: 'Élodie Maugé', agence: 'Maugé Immobilier', ville: 'Sud Rhodanien et Nord-Isère', specialites: ['Transaction'], photo: 'assets/portraits/portrait-3.jpg', fondatrice: true,
-      description: 'Présidente et co-fondatrice de Maugé Immobilier, agence familiale et indépendante. Après 10 ans dans le marketing à l\'international, elle rejoint un réseau de mandataires en 2019 aux côtés de son mari Maxime ; n°1 Top France en 2020 (750 K€ HT de chiffre d\'affaires), ils créent Maugé Immobilier en 2021. Coach certifiée à la méthode Miller Heiman et en intelligence émotionnelle, elle intervient aussi auprès d\'étudiants en école supérieure d\'immobilier (Sciences-U EFAB Lyon). Son agence rayonne sur la région lyonnaise, la vallée de l\'Ozon et le Nord-Isère, avec plus de 520 avis clients notés 4,8/5 sur Google.',
-      site: '', linkedin: '', instagram: '', email: '', tel: '' },
-    { nom: 'Émilie Viala', agence: 'Noovimo Sud Ouest', ville: 'Sud Ouest', specialites: [], photo: 'assets/portraits/portrait-4.jpg', fondatrice: true,
-      description: 'Fondatrice du réseau immobilier Home Land Transaction en 2015 et Directrice du réseau immobilier Noovimo Sud Ouest depuis 2021.',
-      site: '', linkedin: '', instagram: '', email: '', tel: '' }
-  ];
-
+  var MEMBERS = window.IMMOLLIA_MEMBRES || [];
   var list = document.getElementById('directory'), empty = document.getElementById('dir-empty'), count = document.getElementById('dir-count');
   var search = document.getElementById('dir-search'), filter = document.getElementById('dir-filter');
 
   var specs = {};
-  MEMBERS.forEach(function (m) { m.specialites.forEach(function (s) { specs[s] = true; }); });
+  MEMBERS.forEach(function (m) { (m.specialites || []).forEach(function (s) { specs[s] = true; }); });
   Object.keys(specs).sort().forEach(function (s) { var o = document.createElement('option'); o.value = s; o.textContent = s; filter.appendChild(o); });
 
   var esc = function (t) { return String(t || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
-  var norm = function (t) { return (t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); };
+  var norm = function (t) { return (t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); };
   var initials = function (n) { return n.split(/\s+/).map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase(); };
-  var link = function (href, label) { return href ? '<a href="' + esc(href) + '" target="_blank" rel="noopener">' + label + '</a>' : ''; };
 
+  // Carte compacte : photo, nom, intitulé. Un clic ouvre la fiche complète du membre.
   function render() {
     var q = norm(search.value.trim()), f = filter.value;
     list.innerHTML = '';
     var shown = MEMBERS.filter(function (m) {
-      var hay = norm([m.nom, m.agence, m.ville, m.description].concat(m.specialites).join(' '));
-      return (!q || hay.indexOf(q) !== -1) && (!f || m.specialites.indexOf(f) !== -1);
+      var hay = norm([m.nom, m.titre, m.agence, m.ville, m.description].concat(m.specialites || []).join(' '));
+      return (!q || hay.indexOf(q) !== -1) && (!f || (m.specialites || []).indexOf(f) !== -1);
     });
     shown.forEach(function (m) {
-      var el = document.createElement('article'); el.className = 'member';
-      var photo = m.photo ? '<img src="' + esc(m.photo) + '" alt="" width="64" height="64" loading="lazy">' : '<div class="avatar" aria-hidden="true">' + esc(initials(m.nom)) + '</div>';
-      var meta = [m.ville || 'Ville à compléter'].concat(m.specialites).map(function (t) { return '<span>' + esc(t) + '</span>'; }).join('<span aria-hidden="true">·</span>');
-      var links = [link(m.site, 'Site'), link(m.linkedin, 'LinkedIn'), link(m.instagram, 'Instagram'),
-        m.email ? '<a href="mailto:' + esc(m.email) + '">E-mail</a>' : '', m.tel ? '<a href="tel:' + esc(m.tel.replace(/\s/g, '')) + '">' + esc(m.tel) + '</a>' : ''].filter(Boolean).join('');
-      el.innerHTML = photo + '<div><h3>' + esc(m.nom) + '</h3><p class="agency">' + (esc(m.agence) || 'Agence à compléter') + '</p><p class="meta">' + meta + '</p>'
-        + (m.description ? '<p class="desc">' + esc(m.description) + '</p>' : '')
-        + '<div class="links">' + links + (m.fondatrice ? '<a href="index.html#rejoindre">Poser une question</a>' : '') + '</div>'
-        + (m.fondatrice ? '<span class="tag">Membre fondatrice</span>' : '') + '</div>';
+      var el = document.createElement('a'); el.className = 'member-card'; el.href = 'membre.html?m=' + encodeURIComponent(m.id);
+      var photo = m.photo ? '<img src="' + esc(m.photo) + '" alt="" width="96" height="96" loading="lazy">' : '<div class="avatar" aria-hidden="true">' + esc(initials(m.nom)) + '</div>';
+      el.innerHTML = photo + '<h3>' + esc(m.nom) + '</h3><p class="titre">' + esc(m.titre || m.agence) + '</p>'
+        + (m.ville ? '<p class="ville">' + esc(m.ville) + '</p>' : '')
+        + '<span class="voir">Découvrir <span aria-hidden="true">→</span></span>';
       list.appendChild(el);
     });
     empty.hidden = shown.length > 0;

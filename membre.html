@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Membre · IMMOLLIA</title>
+<meta name="description" content="Fiche d'une membre de la communauté IMMOLLIA : parcours, agence, secteur et contacts.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@500;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="index.html" class="brand" aria-label="IMMOLLIA, accueil">
+      <img src="assets/logo-immollia.png" alt="IMMOLLIA" width="142" height="46">
+    </a>
+    <button type="button" class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="nav">Menu</button>
+    <nav class="nav" id="nav" aria-label="Navigation principale">
+      <a href="index.html#piliers">La communauté</a>
+      <a href="index.html#histoire">Notre histoire</a>
+      <a href="zone-de-genie.html">Zone de Génie</a>
+      <a href="annuaire.html" aria-current="page">Annuaire</a>
+      <a href="index.html#agenda">Agenda</a>
+      <a href="index.html#presse">Ils parlent de nous</a>
+      <a href="index.html#rejoindre" class="btn btn--primary">Rejoindre</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <p class="breadcrumb profil-breadcrumb"><a href="index.html">Accueil</a> › <a href="annuaire.html">Annuaire</a> › <span id="p-fil">Membre</span></p>
+    <article class="profil" id="profil" hidden>
+      <div class="profil-head">
+        <div id="p-photo"></div>
+        <div>
+          <span class="tag" id="p-tag" hidden>Membre fondatrice</span>
+          <h1 id="p-nom"></h1>
+          <p class="profil-titre" id="p-titre"></p>
+          <p class="profil-meta" id="p-meta"></p>
+        </div>
+      </div>
+      <div class="profil-body">
+        <section>
+          <h2>Présentation</h2>
+          <div id="p-desc"></div>
+        </section>
+        <aside class="profil-contact">
+          <h2>Contact et réseaux</h2>
+          <div class="profil-links" id="p-links"></div>
+          <a href="index.html#rejoindre" class="btn btn--primary" id="p-question">Poser une question <span class="arrow" aria-hidden="true">→</span></a>
+        </aside>
+      </div>
+      <nav class="profil-nav" aria-label="Autres membres">
+        <a href="#" id="p-prev">← <span></span></a>
+        <a href="annuaire.html">Tout l'annuaire</a>
+        <a href="#" id="p-next"><span></span> →</a>
+      </nav>
+    </article>
+    <div class="empty" id="p-absent" hidden>Cette fiche n'existe pas ou plus. <a href="annuaire.html">Retour à l'annuaire</a></div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap footer-top">
+    <img src="assets/logo-immollia.png" alt="IMMOLLIA" width="136" height="44">
+    <nav aria-label="Liens de bas de page">
+      <a href="index.html#piliers">La communauté</a>
+      <a href="index.html#histoire">Notre histoire</a>
+      <a href="zone-de-genie.html">Zone de Génie</a>
+      <a href="annuaire.html">Annuaire</a>
+      <a href="index.html#agenda">Agenda</a>
+      <a href="index.html#presse">Ils parlent de nous</a>
+      <a href="index.html#rejoindre">Rejoindre</a>
+    </nav>
+    <div class="footer-contact">
+      <a href="tel:+33660994469">06 60 99 44 69</a>
+      <a href="mailto:contact@immollia.fr">contact@immollia.fr</a>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <span>IMMOLLIA, association loi 1901 · Inspirer. Fédérer. Rayonner.</span>
+    <nav aria-label="Informations légales">
+      <a href="#" title="À compléter avant la mise en ligne">Mentions légales</a>
+      <a href="#" title="À compléter avant la mise en ligne">Confidentialité</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="assets/site.js"></script>
+<script src="assets/membres.js"></script>
+<script>
+(function () {
+  var MEMBERS = window.IMMOLLIA_MEMBRES || [];
+  var id = new URLSearchParams(location.search).get('m') || '';
+  var idx = -1;
+  MEMBERS.forEach(function (m, i) { if (m.id === id) idx = i; });
+  if (idx < 0) { document.getElementById('p-absent').hidden = false; return; }
+  var m = MEMBERS[idx];
+  var esc = function (t) { return String(t || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var $ = function (i) { return document.getElementById(i); };
+
+  document.title = m.nom + ' · IMMOLLIA';
+  $('p-fil').textContent = m.nom;
+  $('p-nom').textContent = m.nom;
+  $('p-titre').textContent = m.titre || m.agence || '';
+  $('p-tag').hidden = !m.fondatrice;
+  $('p-photo').innerHTML = m.photo ? '<img src="' + esc(m.photo) + '" alt="' + esc(m.nom) + '" width="180" height="180">'
+    : '<div class="avatar" aria-hidden="true">' + esc(m.nom.split(/\s+/).map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase()) + '</div>';
+  $('p-meta').innerHTML = [m.agence, m.ville].concat(m.specialites || []).filter(Boolean).map(function (t) { return '<span>' + esc(t) + '</span>'; }).join('<span aria-hidden="true">·</span>');
+  $('p-desc').innerHTML = m.description ? m.description.split(/\n+/).map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') : '<p>Présentation à venir.</p>';
+
+  var ext = function (href, label) { return href ? '<a href="' + esc(href) + '" target="_blank" rel="noopener">' + label + '</a>' : ''; };
+  var links = [ext(m.site, 'Site internet'), ext(m.linkedin, 'LinkedIn'), ext(m.instagram, 'Instagram'), ext(m.facebook, 'Facebook'),
+    m.email ? '<a href="mailto:' + esc(m.email) + '">' + esc(m.email) + '</a>' : '',
+    m.tel ? '<a href="tel:' + esc(m.tel.replace(/\s/g, '')) + '">' + esc(m.tel) + '</a>' : '',
+    m.adresse ? '<a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(m.adresse) + '" target="_blank" rel="noopener">📍 ' + esc(m.adresse) + '</a>' : ''].filter(Boolean);
+  $('p-links').innerHTML = links.length ? links.join('') : '<p class="profil-vide">Ses coordonnées et réseaux seront bientôt ajoutés.</p>';
+
+  var prev = MEMBERS[(idx - 1 + MEMBERS.length) % MEMBERS.length], next = MEMBERS[(idx + 1) % MEMBERS.length];
+  $('p-prev').href = 'membre.html?m=' + encodeURIComponent(prev.id); $('p-prev').querySelector('span').textContent = prev.nom;
+  $('p-next').href = 'membre.html?m=' + encodeURIComponent(next.id); $('p-next').querySelector('span').textContent = next.nom;
+  $('profil').hidden = false;
+})();
+</script>
+</body>
+</html>
