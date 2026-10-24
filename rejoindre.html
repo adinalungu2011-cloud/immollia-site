@@ -51,7 +51,23 @@ body { background: var(--soft); }
 .wa svg { width: 24px; height: 24px; flex: none; }
 .next { display: flex; flex-direction: column; gap: 0.5rem; width: 100%; }
 .next a { text-align: center; }
-@media (max-width: 380px) { .two { grid-template-columns: 1fr; } }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+/* Téléphone (arrivée par le QR code) : tout plus compact pour voir le formulaire tout de suite. */
+@media (max-width: 600px) {
+  .join { padding-top: 0.9rem; gap: 0.8rem; }
+  .join-top img { height: 36px; }
+  .join h1 { font-size: clamp(1.45rem, 1rem + 2.6vw, 1.8rem); line-height: 1.12; }
+  .join .intro { font-size: 0.95rem; line-height: 1.5; }
+  .pills span { font-size: 0.66rem; padding: 0.3rem 0.6rem; }
+  .card { padding: 1rem; gap: 0.7rem; }
+  .card .field { gap: 0.25rem; }
+  .card .field label { font-size: 0.85rem; }
+  .card .field input { padding: 0.65rem 0.8rem; }
+  .chips label { padding: 0.4rem 0.7rem; font-size: 0.82rem; }
+  .check { font-size: 0.85rem; }
+  .go { padding: 0.95rem 1.2rem; }
+}
+@media (max-width: 330px) { .two { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
