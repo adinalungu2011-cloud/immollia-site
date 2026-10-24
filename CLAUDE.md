@@ -59,6 +59,6 @@ Ces actions vivent dans `api.php` du dépôt adressefinder : les modifier = dép
   Rapatriée le 24/10/2026 depuis la branche `claude/zealous-goldberg-iih3sm` d'adressefinder (branche gardée).
 - **Pas encore installée sur le serveur** : il manque la base MariaDB et `parcours/config.php` (jamais committé,
   bloqué par `.gitignore` et `.htaccess`). Tant qu'il manque, `zg-api.php` répond « pas encore configuré » et
-  l'interface passe en **mode démo** (réponses gardées dans le navigateur seulement) → ne pas la faire connaître
-  avant l'installation. Pour l'installer sans cPanel : ajouter une action dans `api.php` d'adressefinder
+  l'interface passe en **mode démo** (réponses gardées dans le navigateur seulement). D'ici là,
+  `parcours/.htaccess` renvoie `/parcours/` vers `zone-de-genie.html` (la règle s'arrête dès que `config.php` existe). Pour l'installer sans cPanel : ajouter une action dans `api.php` d'adressefinder
   (comme `immollia_update`) qui crée la base et écrit `config.php` hors dépôt — avec l'accord d'Adina.

@@ -1,3 +1,8 @@
+# Tant que le parcours n'est pas installé (pas de config.php sur le serveur) : renvoi vers la page de présentation
+RewriteEngine On
+RewriteCond %{DOCUMENT_ROOT}/parcours/config.php !-f
+RewriteRule ^ /zone-de-genie.html [R=302,L]
+
 # Parcours Zone de Génie : transmettre l'en-tête « Authorization » (jeton de connexion) à zg-api.php
 <IfModule mod_setenvif.c>
     SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
