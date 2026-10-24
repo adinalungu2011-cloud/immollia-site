@@ -10,3 +10,8 @@ RewriteRule ^ https://www.immollia.fr%{REQUEST_URI} [L,R=301]
 # Adresses courtes de la page d'inscription (QR code du salon RENT : /rent)
 RewriteRule ^rejoindre/?$ rejoindre.html [L]
 RewriteRule ^rent/?$ rejoindre.html?src=rent [L,QSA]
+
+# Ne jamais servir les notes internes (.md), les réglages (config*.php) ni les fichiers cachés (.gitignore…)
+<FilesMatch "(\.md$|^config(\.example)?\.php$|^\.)">
+    Require all denied
+</FilesMatch>

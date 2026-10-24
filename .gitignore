@@ -1,0 +1,5 @@
+# Réglages secrets du parcours Zone de Génie (base de données, code communauté) : JAMAIS committés
+config.php
+
+# Fichiers du Mac
+.DS_Store

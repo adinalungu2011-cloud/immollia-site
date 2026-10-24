@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zone de Génie — Immollia</title>
+<meta name="description" content="Parcours de 4 semaines pour identifier et assumer sa zone de génie — communauté Immollia.">
+<link rel="icon" href="logo-immollia.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --magenta:#B8176A; --magenta-2:#D12A80; --violet:#7B2C8F; --violet-2:#9A3FAE; --prune:#141414;
+  --grad:var(--magenta);
+  --bg:#FFFFFF; --card:#F5F4F6; --txt:#2A2A2E; --muted:#6B6B72; --line:#E6E3EA; --ok:#2E7D32;
+  --r:24px; --sh:none;
+  --f1:'Outfit',system-ui,sans-serif; --f2:'Outfit',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f1);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:var(--magenta)}
+button{font-family:inherit}
+h1,h2,h3{margin:0 0 .4em;line-height:1.2}
+h1{font-size:2.1rem;font-weight:900;color:#141414;letter-spacing:-.02em}
+h1 .acc,h2 .acc{color:var(--magenta)}
+h2{font-size:1.4rem;font-weight:800;color:#141414;letter-spacing:-.01em}
+h3{font-size:1.05rem;font-weight:700;color:#141414}
+.muted{color:var(--muted)}
+.small{font-size:.85rem}
+.citation{font-size:1.15rem;font-weight:500;color:#141414;line-height:1.45}
+.eyebrow{display:flex;align-items:center;gap:12px;font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--magenta);font-weight:700}
+.eyebrow::before{content:"";width:34px;height:2px;background:var(--magenta)}
+.hidden{display:none!important}
+
+/* ── En-tête ── */
+header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.hwrap{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{height:54px;width:auto;display:block}
+.tagline{font-size:.66rem;letter-spacing:.24em;text-transform:uppercase;color:var(--violet);font-weight:700;white-space:nowrap}
+.tagline b{color:var(--magenta)}
+nav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+nav button{border:0;background:transparent;padding:8px 12px;border-radius:999px;font-weight:600;color:var(--muted);cursor:pointer;font-size:.88rem}
+nav button:hover{background:#F5F4F6;color:#141414}
+nav button.on{background:var(--magenta);color:#fff}
+.user-chip{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--muted)}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--magenta);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.8rem;object-fit:cover;flex:none;overflow:hidden}
+.avatar.lg{width:96px;height:96px;font-size:2rem}
+.photo-row{display:flex;gap:16px;align-items:center;margin-top:12px}
+
+main{max-width:1180px;margin:0 auto;padding:22px 16px 80px}
+.card{background:var(--card);border-radius:var(--r);padding:26px;border:0}
+.card+.card{margin-top:18px}
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sp{justify-content:space-between}
+
+.btn{border:0;background:var(--magenta);color:#fff;padding:12px 22px;border-radius:999px;font-weight:700;cursor:pointer;font-size:.95rem;box-shadow:none;transition:background .15s,transform .15s}
+.btn:hover{background:var(--magenta-2)}
+.btn:hover{transform:translateY(-1px)}
+.btn.sec{background:#fff;color:#141414;border:1.5px solid #D9D6DD}
+.btn.sec:hover{background:#fff;border-color:#141414}
+.btn.sm{padding:7px 14px;font-size:.82rem}
+.btn:disabled{opacity:.5;cursor:default;transform:none}
+label.lbl{display:block;font-weight:600;font-size:.85rem;color:#141414;margin:12px 0 5px}
+input[type=text],input[type=email],input[type=password],input[type=url],textarea,select{width:100%;border:1.5px solid var(--line);border-radius:14px;padding:11px 13px;font:inherit;background:#fff;color:var(--txt);transition:border .15s}
+input:focus,textarea:focus{outline:none;border-color:var(--magenta);box-shadow:0 0 0 3px rgba(184,23,106,.12)}
+textarea{min-height:110px;resize:vertical;line-height:1.5}
+.hint{font-size:.83rem;color:var(--muted);margin:-2px 0 8px}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.75rem;font-weight:700;background:#fff;color:var(--violet);border:1px solid var(--line)}
+.pill.ok{background:#E8F5E9;color:var(--ok)}
+.pill.mag{background:var(--magenta);color:#fff;border-color:transparent}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#141414;color:#fff;padding:10px 18px;border-radius:999px;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .25s;z-index:50}
+.toast.show{opacity:1}
+.banner{background:#FFF4E5;border:1px solid #FFD8A8;color:#7A4A00;padding:10px 14px;border-radius:12px;font-size:.85rem;margin-bottom:16px}
+
+/* ── Accueil / progression ── */
+.hero{background:#fff;color:#141414;padding:18px 0 28px}
+.hero h1{font-size:clamp(2.2rem,5vw,3.4rem);line-height:1.05;margin:10px 0 14px}
+.hero .citation{max-width:760px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:18px}
+.step{background:var(--card);border-radius:var(--r);padding:20px;border:0;cursor:pointer;transition:transform .15s;position:relative}
+.step:hover{transform:translateY(-2px)}
+.step .num{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--magenta);font-weight:700}
+.step h3{margin:.3em 0 .4em;color:#141414}
+.step.done{background:#EEF7EE}
+.bar{height:8px;background:#E9E6EC;border-radius:999px;overflow:hidden;margin-top:12px}
+.bar i{display:block;height:100%;background:var(--magenta);border-radius:999px;transition:width .4s}
+.kpi{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px}
+.kpi div{background:var(--card);border-radius:18px;padding:12px 18px;color:var(--muted);font-size:.85rem}
+.kpi b{display:block;font-size:1.7rem;color:#141414;font-weight:800}
+
+/* ── Semaines ── */
+.week-head{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.week-head .objectif{background:#fff;border-left:4px solid var(--magenta);padding:12px 16px;border-radius:0 16px 16px 0;flex:1;min-width:260px}
+.part{margin-top:22px}
+.part h3{display:flex;align-items:center;gap:10px}
+.part h3 .n{width:28px;height:28px;border-radius:50%;background:var(--magenta);color:#fff;display:grid;place-items:center;font-size:.8rem}
+.q{margin-top:14px}
+.q .qt{font-weight:600;color:var(--txt);margin-bottom:4px}
+.q .qt em{font-weight:400;color:var(--muted);font-style:normal;font-size:.85rem;display:block}
+.saved{font-size:.75rem;color:var(--ok);height:14px;margin-top:3px}
+.week-foot{margin-top:22px;padding-top:18px;border-top:1px dashed var(--line)}
+.switch{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;font-size:.88rem;color:#141414}
+.switch input{accent-color:var(--magenta);width:18px;height:18px}
+
+/* ── Roue ── */
+.wheel-wrap{display:grid;grid-template-columns:minmax(300px,520px) 1fr;gap:24px;align-items:start}
+@media(max-width:860px){.wheel-wrap{grid-template-columns:1fr}}
+.wheel svg{width:100%;height:auto;display:block}
+.wheel path.comp{cursor:pointer;transition:opacity .15s,filter .15s}
+.wheel path.comp:hover{filter:brightness(1.08)}
+.wheel path.comp.sel{stroke:#fff;stroke-width:3;filter:drop-shadow(0 0 6px rgba(0,0,0,.25))}
+.wheel text{font-family:var(--f1);pointer-events:none}
+.comp-list{display:grid;gap:8px}
+.comp{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:14px;border:1.5px solid transparent;cursor:pointer;background:#fff}
+.comp:hover{border-color:#D9D6DD}
+.comp.sel{border-color:var(--magenta);background:#FDF2F7}
+.comp .dot{width:12px;height:12px;border-radius:50%;flex:none;margin-top:5px}
+.comp b{display:block}
+.comp .def{font-size:.83rem;color:var(--muted)}
+.fam{font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;font-weight:700;margin:14px 0 6px}
+.selbox{background:#fff;border-radius:16px;padding:14px;margin-bottom:14px}
+.selbox .pill{margin:3px 4px 3px 0}
+
+/* ── Groupe ── */
+.members{display:flex;gap:10px;flex-wrap:wrap}
+.member{display:flex;gap:10px;align-items:center;padding:8px 14px 8px 8px;border:0;border-radius:999px;background:#fff}
+.code{font-size:1.4rem;letter-spacing:.2em;font-weight:800;color:var(--magenta);background:#fff;padding:8px 16px;border-radius:14px}
+table.audit{width:100%;border-collapse:separate;border-spacing:0;margin-top:14px;font-size:.88rem}
+table.audit th,table.audit td{border:1px solid var(--line);padding:10px;vertical-align:top;text-align:left}
+table.audit th{background:#fff;color:#141414;font-weight:700}
+table.audit th:first-child{width:26%}
+table.audit td{white-space:pre-wrap;background:#fff}
+table.audit td.np{color:#A8A4AD;font-style:italic;background:#FAF9FB}
+.weektabs{display:flex;gap:6px;flex-wrap:wrap}
+.weektabs button{border:1.5px solid var(--line);background:#fff;padding:7px 14px;border-radius:999px;font-weight:600;cursor:pointer;color:var(--muted)}
+.weektabs button.on{background:var(--magenta);border-color:transparent;color:#fff}
+
+/* ── Guide ── */
+.agenda{display:grid;gap:8px}
+.agenda .it{display:grid;grid-template-columns:70px 1fr;gap:12px;padding:10px 12px;border-radius:14px;background:#fff;border:0}
+.agenda .t{font-weight:800;color:var(--magenta);font-size:.85rem}
+.agenda ul{margin:4px 0 0 18px;padding:0}
+
+/* ── Connexion ── */
+.auth{max-width:460px;margin:30px auto}
+.auth .logo{height:90px;margin:0 auto 6px}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{flex:1;border:1.5px solid var(--line);background:#fff;padding:9px;border-radius:12px;font-weight:700;cursor:pointer;color:var(--muted)}
+.tabs button.on{background:var(--magenta);color:#fff;border-color:transparent}
+.err{color:#B00020;font-size:.85rem;min-height:18px;margin-top:8px}
+
+/* ── Impression ── */
+@media print{
+  header,nav,.no-print,.toast,.banner{display:none!important}
+  body{background:#fff}
+  main{max-width:none;padding:0}
+  .card{box-shadow:none;border:0;page-break-inside:avoid}
+  textarea{border:1px solid #ccc;min-height:60px}
+  .print-only{display:block!important}
+}
+.print-only{display:none}
+footer{text-align:center;color:var(--muted);font-size:.78rem;padding:30px 16px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hwrap">
+    <img class="logo" src="logo-immollia.webp" alt="Immollia">
+    <div class="tagline">Excellence <b>•</b> Compétence <b>•</b> Professionnalisme</div>
+    <nav id="nav" class="hidden">
+      <button data-p="accueil">Accueil</button>
+      <button data-p="s1">Semaine 1</button>
+      <button data-p="s2">Semaine 2</button>
+      <button data-p="s3">Semaine 3</button>
+      <button data-p="s4">Semaine 4</button>
+      <button data-p="roue">La roue</button>
+      <button data-p="groupe">Mon binôme</button>
+      <button data-p="guide">Guide visio</button>
+      <button data-p="profil">Profil</button>
+    </nav>
+  </div>
+</header>
+
+<main id="main"></main>
+<footer>Immollia — parcours « Zone de Génie » · <span id="ver">v1</span> · Basé sur le modèle EQ-i 2.0 (Bar-On / MHS) pour la roue de l'intelligence émotionnelle.</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+//  CONTENU DU PARCOURS (issu du carnet de bord, de la grille d'audit et du
+//  guide d'entretien). Chaque champ a une clé « sN_xxx » enregistrée en base.
+// ═══════════════════════════════════════════════════════════════════════════
+const REGLE_OR = "On m'a appris à être bonne partout, je vais apprendre à assumer là où je suis excellente. Ma zone de génie est ma responsabilité. Je l'assume.";
+
+const FAMILLES = [
+  {id:'soi', nom:'Perception de soi', c:'#C62845', comps:[
+    {id:'amour',   nom:"Amour-propre",               def:"Se respecter soi-même tout en comprenant et en acceptant ses propres points forts et points faibles ; sentiment de force intérieure et de confiance en soi."},
+    {id:'real',    nom:"Réalisation de soi",          def:"Souhait d'essayer constamment de s'améliorer et de s'impliquer dans des objectifs personnels pertinents et significatifs."},
+    {id:'consc',   nom:"Conscience de soi émotionnelle", def:"Reconnaître et comprendre ses propres émotions, leurs causes et leur impact sur ses réflexions, ses actions et celles des autres."}]},
+  {id:'expr', nom:'Expression individuelle', c:'#C85A2A', comps:[
+    {id:'exprem',  nom:"Expression émotionnelle",    def:"Exprimer ouvertement ses propres sentiments, de façon verbale ou non verbale."},
+    {id:'affirm',  nom:"Affirmation de soi",         def:"Communiquer ouvertement sentiments, croyances et réflexions, défendre ses valeurs et ses droits de façon acceptable, non agressive."},
+    {id:'indep',   nom:"Indépendance",               def:"Rester autodirigé et libre de toute dépendance émotionnelle : décider, planifier et agir de façon autonome."}]},
+  {id:'rel', nom:'Facultés relationnelles', c:'#B8962E', comps:[
+    {id:'relhum',  nom:"Relations humaines",         def:"Développer et maintenir des relations mutuellement satisfaisantes, fondées sur la confiance et la compassion."},
+    {id:'empat',   nom:"Empathie",                   def:"Reconnaître, comprendre et prendre en compte les sentiments des autres ; exprimer sa compréhension d'un point de vue différent du sien."},
+    {id:'respso',  nom:"Responsabilité sociale",     def:"Contribuer volontairement à son groupe et au bien-être des autres ; agir de façon responsable avec une conscience sociale."}]},
+  {id:'dec', nom:'Prise de décision', c:'#5E9A3C', comps:[
+    {id:'resol',   nom:"Résolution de problèmes",    def:"Résoudre des problèmes dans des circonstances qui impliquent des émotions ; comprendre comment les émotions influent sur la décision."},
+    {id:'real2',   nom:"Sens de la réalité",         def:"Rester objectif en voyant les choses comme elles sont vraiment ; repérer quand les émotions ou le parti pris rendent moins objectif."},
+    {id:'impuls',  nom:"Contrôle des impulsions",    def:"Résister ou attendre avant d'exprimer une impulsion ou une tentation d'action ; éviter les décisions irréfléchies."}]},
+  {id:'stress', nom:'Gestion du stress', c:'#2B7FA3', comps:[
+    {id:'flex',    nom:"Flexibilité",                def:"Adapter ses émotions, réflexions et comportements à des idées ou des circonstances dynamiques, imprévisibles et inhabituelles."},
+    {id:'tolst',   nom:"Tolérance au stress",        def:"S'adapter à des situations difficiles ou stressantes en gardant la conviction que l'on peut gérer ou influer positivement."},
+    {id:'optim',   nom:"Optimisme",                  def:"Attitude et conception de la vie positives ; rester optimiste et endurant malgré les déboires occasionnels."}]}
+];
+const COMPS = FAMILLES.flatMap(f=>f.comps.map(c=>({...c, fam:f.nom, color:f.c})));
+const compById = id => COMPS.find(c=>c.id===id);
+
+const SEMAINES = [
+  {n:1, titre:"L'audit initial & prise de conscience", sous:"Intelligence émotionnelle",
+   objectif:"Analyser mon quotidien actuel et repérer mes points de frustration (surcharge, éparpillement). Observer, au fil de l'eau, ce qui est facile pour moi.",
+   parties:[
+    {titre:"Mon audit autonome", hint:"À observer et noter au fil de la semaine — pas besoin de tout remplir d'un coup.", champs:[
+      {k:'s1_q1', q:"1. Qu'est-ce que je fais sans effort ?", e:"Ce qui est fluide, naturel, où je ne vois pas le temps passer."},
+      {k:'s1_q2', q:"2. Sur quoi les autres me sollicitent-ils naturellement ?", e:"Ce pour quoi mes collègues ou clients viennent spontanément me voir."},
+      {k:'s1_q3', q:"3. Quelles actions me rapportent le plus de résultats et de plaisir ?", e:"Mes victoires faciles, stimulantes et gratifiantes."},
+      {k:'s1_q4', q:"4. Qu'est-ce que je pourrais faire même fatiguée ?", e:"L'activité qui me ressource et me redonne de l'énergie au lieu de me vider."}]},
+    {titre:"Mon diagnostic émotionnel", champs:[
+      {k:'s1_surcharge', q:"Surcharge & niveau d'énergie", e:"Quelles sont les tâches de mon quotidien actuel qui génèrent de la frustration, du stress ou une baisse d'énergie notable ?"},
+      {k:'s1_legit', q:"Le syndrome de la polyvalence (posture & légitimité)", e:"Comment est-ce que je gère la croyance « Pour être légitime, je dois tout savoir faire » ? Dans quelles situations cela me pousse-t-il au contrôle ou à la surcharge ?"},
+      {k:'__roue', q:"Mes forces en intelligence émotionnelle", e:"Parmi les 15 compétences de la roue, choisis les 5 qui résonnent le plus avec tes facilités naturelles observées ci-dessus."}]}
+   ]},
+  {n:2, titre:"À la découverte de ma « Zone de Génie »", sous:"Casser le paradoxe de la facilité",
+   objectif:"Débriefer l'audit et lever les blocages liés à la facilité. Ce qui est facile pour toi a une immense valeur : c'est exactement là que se cache ta plus grande richesse.",
+   parties:[
+    {titre:"Clarification de ma zone de génie brute", champs:[
+      {k:'s2_zone', q:"Comment je formalise ma force principale ?", e:"Suite au débriefing avec mon binôme : ex. le relationnel de confiance, la rentrée de mandats exclusifs, le réseautage local, la négociation fine…"},
+      {k:'s2_blocages', q:"Mes blocages à lever", e:"Qu'est-ce qui m'empêche encore de considérer cette facilité comme une vraie valeur ? (paradoxe de la facilité, peur de « faire moins »…)"}]},
+    {titre:"Mes exemples du terrain", hint:"Pour chacune de tes 5 compétences clés, note un exemple concret et récent vécu sur le terrain immobilier où elle a rendu une situation fluide et performante.", champs:[], comps:true, extra:[
+      {k:'s2_exemples', q:"Autres exemples concrets", e:"Au moins deux situations récentes où ton intelligence émotionnelle a fait la différence."}]}
+   ]},
+  {n:3, titre:"Stratégie d'alignement & plan de délégation", sous:"De la théorie à l'action sur le terrain",
+   objectif:"Passer de la théorie à l'action concrète : choisir mon focus absolu, décider ce que je délègue, dessiner ma semaine type idéale.",
+   parties:[
+    {titre:"Mon focus absolu", champs:[
+      {k:'s3_focus', q:"Quelles sont les activités vitales sur lesquelles je choisis de me concentrer à 100 % ?", e:"Ex. uniquement les rendez-vous clients R1/R2, la prospection stratégique, les visites ciblées, le réseautage, le sponsoring…"}]},
+    {titre:"Mon plan de délégation & lâcher-prise", champs:[
+      {k:'s3_deleg', q:"Quelles tâches chronophages ou hors de ma zone de génie doivent basculer vers des collaborateurs, des alternants ou de l'automatisation digitale ?", e:"Liste-les, et pour chacune : vers qui ou vers quel outil."},
+      {k:'s3_lacher', q:"Comment l'intelligence émotionnelle m'aide-t-elle à lâcher le contrôle ?", e:"Quelle compétence de la roue mobiliser pour accepter de ne plus tout contrôler ?"}]},
+    {titre:"Ma semaine type « idéale »", champs:[
+      {k:'s3_semaine', q:"Mes blocs de temps inamovibles dédiés uniquement à ma zone de génie", e:"Structure-les en binôme. Ex. mardi & jeudi matin : R1/R2 uniquement ; vendredi 14h-16h : réseautage…"},
+      {k:'s3_premier', q:"Mon premier changement concret applicable dès cette semaine", e:"Une seule action, petite et immédiate."}]}
+   ]},
+  {n:4, titre:"Clarté, posture & signature", sous:"Ancrer la nouvelle posture",
+   objectif:"Mesurer l'impact (clarté, performance, plaisir) et ancrer ma posture : devenir lisible pour mes clients, arrêter de me comparer ou de copier.",
+   parties:[
+    {titre:"Mon retour d'expérience terrain (REX)", champs:[
+      {k:'s4_rex', q:"Quels sont les premiers impacts mesurés après ces semaines d'alignement ?", e:"Gain de temps réel, niveau de plaisir retrouvé, réduction de la charge mentale, clarté face aux clients…"}]},
+    {titre:"Ma signature de marque", champs:[
+      {k:'s4_signature', q:"Comment ma zone de génie devient-elle ma signature unique ?", e:"Comment mes clients me reconnaissent-ils ? Qu'est-ce qui me rend « lisible » ?"},
+      {k:'s4_paix', q:"Paix intérieure & alignement", e:"Qu'est-ce que j'arrête de comparer ou de copier chez les autres ? Qu'est-ce que j'assume désormais ?"},
+      {k:'s4_verbatims', q:"Mes verbatims & phrases clés", e:"Les phrases qui résument mon parcours — témoignages précieux pour nourrir la proposition de valeur collective de la communauté."}]}
+   ]}
+];
+
+// Guide d'entretien (visio hebdo d'1 h)
+const GUIDE = [
+  {n:1, titre:"L'audit initial & prise de conscience", items:[
+    ["5 min","Accueil & posture", ["Rappeler la règle d'or : « On nous a appris à être bonnes partout, nous allons apprendre à assumer là où vous êtes excellentes. »"]],
+    ["25 min","Le diagnostic émotionnel", ["Quelles tâches actuelles génèrent frustration, stress ou baisse d'énergie ? (analyse de la surcharge)", "Comment gérez-vous la croyance « Pour être légitime, je dois tout savoir faire » ?"]],
+    ["25 min","Lancement de l'audit autonome", ["Présenter les 4 questions clés à observer cette semaine (sans effort / sollicitations / résultats & plaisir / même fatiguée)."]],
+    ["5 min","Plan d'action", ["Chacune remplit son audit dans l'application avant la prochaine visio."]]]},
+  {n:2, titre:"À la découverte de sa « Zone de Génie »", items:[
+    ["20 min","Débrief de l'audit", ["Analyse en binôme des réponses aux 4 questions (vue « Mon binôme » → grille d'audit)."]],
+    ["20 min","Casser le paradoxe de la facilité", ["Message clé : « Ce qui est facile pour vous a une immense valeur. C'est exactement là que se cache votre plus grande richesse. »", "Identifier la zone de génie brute de chacune (relationnel, rentrer des mandats, réseautage…)."]],
+    ["15 min","Intelligence émotionnelle", ["Parcourir la roue des 15 compétences ensemble."]],
+    ["5 min","Plan d'action", ["Chacune confirme ses 5 compétences clés et note des exemples concrets du terrain."]]]},
+  {n:3, titre:"Stratégie d'alignement & plan de délégation", items:[
+    ["20 min","Le choix stratégique", ["Définir le focus absolu de chacune. Exemple : se concentrer uniquement sur les R1/R2, visites découvertes, réseautage et sponsoring."]],
+    ["20 min","Le plan de délégation", ["Quelles tâches basculent vers collaborateurs, alternants ou automatisation ?", "Comment l'intelligence émotionnelle aide-t-elle à lâcher prise ?"]],
+    ["15 min","Mise en situation en binôme", ["S'entraider pour structurer la nouvelle semaine type « idéale »."]],
+    ["5 min","Plan d'action", ["Appliquer le premier changement concret dès cette semaine."]]]},
+  {n:4, titre:"Clarté, posture & signature", items:[
+    ["20 min","Retour d'expérience terrain", ["Quels premiers impacts mesurés ? Plus de clarté, plus de plaisir, gain de temps ?"]],
+    ["20 min","Ancrage de la posture", ["Devenir « lisible » pour ses clients : comment la zone de génie devient une signature de marque.", "Gagner en paix intérieure en arrêtant de se comparer ou de copier."]],
+    ["15 min","Collecte des témoignages", ["Récolter verbatims et phrases clés pour la proposition de valeur de la communauté."]],
+    ["5 min","Clôture", ["Message de fin : « Votre zone de génie est votre responsabilité. Assumez-la. »"]]]}
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  STOCKAGE : API PHP (zg-api.php) si disponible, sinon « mode démo » dans
+//  le navigateur (localStorage) — utile pour tester l'application sans serveur.
+// ═══════════════════════════════════════════════════════════════════════════
+const API = 'zg-api.php';
+const Store = {
+  mode: 'api', token: localStorage.getItem('zg_token') || '',
+  async detect(){
+    try{ const r = await fetch(API+'?action=ping',{method:'POST'}); const j = await r.json(); if(j && j.ok){ this.mode='api'; return; } }catch(e){}
+    this.mode='demo';
+  },
+  async call(action, body){
+    if(this.mode==='demo') return Demo.call(action, body||{});
+    const r = await fetch(API+'?action='+action,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+this.token},body:JSON.stringify(body||{})});
+    let j; try{ j = await r.json(); }catch(e){ throw new Error('Réponse serveur illisible.'); }
+    if(!r.ok || !j.ok){ if(r.status===401){ this.setToken(''); } throw new Error(j.error||('Erreur '+r.status)); }
+    return j;
+  },
+  setToken(t){ this.token=t; if(t) localStorage.setItem('zg_token',t); else localStorage.removeItem('zg_token'); }
+};
+// Mode démo : tout vit dans ce navigateur. Un binôme fictif « Camille » illustre la vue groupe.
+const Demo = {
+  g(k,d){ try{ return JSON.parse(localStorage.getItem('zg_demo_'+k)) ?? d; }catch(e){ return d; } },
+  s(k,v){ localStorage.setItem('zg_demo_'+k, JSON.stringify(v)); },
+  camille(){ return {id:2, prenom:'Camille', nom:'(exemple)', agence:'Agence du Parc', email:'camille@exemple.fr', partage:[1,2], moi:false, entries:{
+    s1_q1:"Mettre à l'aise un vendeur dès la première visite, créer la confiance en 10 minutes.", s1_q2:"Mes collègues me demandent d'intervenir quand une négociation coince.", s1_q3:"Les R1 : quand je rentre un mandat exclusif après un seul rendez-vous.", s1_q4:"Appeler mes anciens clients pour prendre des nouvelles.",
+    s1_surcharge:"La rédaction des annonces et le tri des photos me vident.", s1_legit:"J'ai l'impression de devoir tout faire moi-même pour être crédible, surtout l'administratif.",
+    s1_competences:JSON.stringify(['relhum','empat','affirm','optim','tolst']), s2_zone:"Le relationnel de confiance : je rentre des mandats exclusifs grâce au lien humain."}}; },
+  async call(a,b){
+    const me = this.g('user',null);
+    if(a==='ping') return {ok:true};
+    if(a==='register'){ const u={id:1,email:b.email,prenom:b.prenom||'Moi',nom:b.nom||'',agence:b.agence||'',admin:false}; this.s('user',u); return {ok:true,token:'demo',user:u}; }
+    if(a==='login'){ if(!me) throw new Error("Aucun compte dans ce navigateur : crée-le dans l'onglet « Créer mon accès »."); return {ok:true,token:'demo',user:me}; }
+    if(a==='logout') return {ok:true};
+    if(!me) throw new Error('Connexion requise.');
+    if(a==='me') return {ok:true,user:me};
+    if(a==='profil'){ Object.assign(me,{prenom:b.prenom??me.prenom,nom:b.nom??me.nom,agence:b.agence??me.agence}); if('photo' in b) me.photo=b.photo||null; this.s('user',me); return {ok:true}; }
+    if(a==='carnet') return {ok:true,entries:this.g('entries',{})};
+    if(a==='sauver'){ const e=this.g('entries',{}); for(const k in b.entries) e[k]=typeof b.entries[k]==='string'?b.entries[k]:JSON.stringify(b.entries[k]); this.s('entries',e); return {ok:true}; }
+    const grp = this.g('groupe',null);
+    const liste = ()=>{ const g=this.g('groupe',null); return g ? [{...g, membres:2, createur:true}] : []; };
+    if(a==='groupes') return {ok:true,groupes:liste()};
+    if(a==='groupe_creer'){ const g={id:1,code:'DEMO42',nom:b.nom||('Binôme de '+me.prenom),visio_jour:'',visio_lien:''}; this.s('groupe',g); return {ok:true,id:1,code:g.code,groupes:liste()}; }
+    if(a==='groupe_rejoindre'){ if((b.code||'').toUpperCase()!=='DEMO42') throw new Error('En mode démo, le seul code qui existe est DEMO42.'); const g={id:1,code:'DEMO42',nom:'Binôme de Camille',visio_jour:'',visio_lien:''}; this.s('groupe',g); return {ok:true,id:1,groupes:liste()}; }
+    if(a==='groupe_quitter'){ localStorage.removeItem('zg_demo_groupe'); return {ok:true,groupes:[]}; }
+    if(a==='groupe_visio'){ Object.assign(grp,{visio_jour:b.visio_jour,visio_lien:b.visio_lien}); this.s('groupe',grp); return {ok:true}; }
+    if(a==='groupe'){ if(!grp) throw new Error('Groupe introuvable.'); const e=this.g('entries',{}); const part=[1,2,3,4].filter(n=>e['partage_s'+n]==='1');
+      return {ok:true,groupe:grp,membres:[{...me,partage:part,entries:e,moi:true},this.camille()],notes:this.g('notes',[])}; }
+    if(a==='note'){ const n=this.g('notes',[]).filter(x=>!(x.auteur===1&&x.cible===b.cible&&x.semaine===b.semaine)); n.push({auteur:1,cible:b.cible,semaine:b.semaine,texte:b.texte}); this.s('notes',n); return {ok:true}; }
+    throw new Error('Action inconnue (démo).');
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  ÉTAT & RENDU
+// ═══════════════════════════════════════════════════════════════════════════
+const S = { user:null, entries:{}, page:'accueil', groupes:[], groupe:null, gsem:1 };
+const $ = s => document.querySelector(s);
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toast = (m,ms=1800)=>{ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),ms); };
+const val = k => S.entries[k] || '';
+const avatar = (u,cls='') => u && u.photo ? `<img class="avatar ${cls}" src="${u.photo}" alt="">` : `<span class="avatar ${cls}">${esc(((u&&u.prenom)||'?')[0].toUpperCase())}</span>`;
+const comps = () => { try{ const a=JSON.parse(val('s1_competences')||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } };
+
+// Sauvegarde automatique (regroupée, 700 ms après la dernière frappe)
+let pending = {}, saveT = null;
+function save(k, v, cb){
+  S.entries[k] = v; pending[k] = v;
+  clearTimeout(saveT);
+  saveT = setTimeout(async ()=>{
+    const batch = pending; pending = {};
+    try{ await Store.call('sauver',{entries:batch}); document.querySelectorAll('.saved[data-k]').forEach(el=>{ if(batch[el.dataset.k]!==undefined) el.textContent='✓ enregistré'; }); if(cb) cb(); }
+    catch(e){ toast('⚠ Non enregistré : '+e.message, 4000); }
+  }, 700);
+}
+
+// Progression : une semaine est « faite » quand ses champs sont remplis (ou cochée).
+function remplis(n){ const w=SEMAINES[n-1]; const ks=w.parties.flatMap(p=>[...p.champs.map(c=>c.k),...(p.extra||[]).map(c=>c.k)]).filter(k=>!k.startsWith('__')); if(n===1) ks.push('s1_competences'); const ok=ks.filter(k=>{ const v=val(k); return k==='s1_competences'? comps().length===5 : v.trim().length>0; }).length; return {ok, total:ks.length}; }
+const faite = n => val('fait_s'+n)==='1';
+function progression(){ let t=0,o=0; for(let n=1;n<=4;n++){ const r=remplis(n); t+=r.total; o+=r.ok; } return Math.round(100*o/Math.max(1,t)); }
+
+// ── Navigation ─────────────────────────────────────────────────────────────
+function go(p){ S.page=p; location.hash=p; render(); window.scrollTo({top:0}); }
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.p));
+window.addEventListener('hashchange',()=>{ const p=location.hash.slice(1); if(p && p!==S.page && S.user){ S.page=p; render(); } });
+
+function render(){
+  const m = $('#main');
+  if(!S.user){ $('#nav').classList.add('hidden'); m.innerHTML = vueAuth(); bindAuth(); return; }
+  $('#nav').classList.remove('hidden');
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on', b.dataset.p===S.page));
+  const pb=document.querySelector('#nav button[data-p=profil]'); pb.innerHTML=`<span class="row" style="gap:6px">${avatar(S.user).replace('class="avatar','style="width:22px;height:22px;font-size:.65rem" class="avatar')}Profil</span>`;
+  const demo = Store.mode==='demo' ? `<div class="banner">🧪 <b>Mode démo</b> : aucun serveur détecté, tes réponses sont stockées uniquement dans ce navigateur. Une fois l'application installée sur immollia.fr, elles seront enregistrées sur ton compte.</div>` : '';
+  const p = S.page;
+  let h = demo;
+  if(p==='accueil') h += vueAccueil();
+  else if(/^s[1-4]$/.test(p)) h += vueSemaine(+p[1]);
+  else if(p==='roue') h += vueRoue();
+  else if(p==='groupe') h += vueGroupe();
+  else if(p==='guide') h += vueGuide();
+  else if(p==='profil') h += vueProfil();
+  else if(p==='impression') h += vueImpression();
+  else h += vueAccueil();
+  m.innerHTML = h;
+  bind(p);
+}
+
+// ── Connexion ──────────────────────────────────────────────────────────────
+function vueAuth(){
+  const demo = Store.mode==='demo' ? `<div class="banner">🧪 Mode démo (sans serveur) : crée un accès avec n'importe quel e-mail, le code communauté n'est pas vérifié.</div>` : '';
+  return `<div class="auth">
+    <img class="logo" src="logo-immollia.webp" alt="Immollia">
+    <div class="card">
+      ${demo}
+      <h1 style="text-align:center">Parcours Zone de <span class="acc">Génie.</span></h1>
+      <p class="citation" style="text-align:center;margin:0 0 18px">« ${REGLE_OR} »</p>
+      <div class="tabs"><button class="on" data-t="login">Me connecter</button><button data-t="register">Créer mon accès</button></div>
+      <form id="f-login">
+        <label class="lbl">E-mail</label><input type="email" name="email" required autocomplete="email">
+        <label class="lbl">Mot de passe</label><input type="password" name="password" required autocomplete="current-password">
+        <div class="err" id="err-login"></div>
+        <button class="btn" style="width:100%;margin-top:6px">Entrer dans mon parcours</button>
+      </form>
+      <form id="f-register" class="hidden">
+        <div class="grid g2" style="gap:0 12px">
+          <div><label class="lbl">Prénom *</label><input type="text" name="prenom" required></div>
+          <div><label class="lbl">Nom</label><input type="text" name="nom"></div>
+        </div>
+        <label class="lbl">Agence / activité</label><input type="text" name="agence" placeholder="ex. Agence du Plessis-Robinson">
+        <label class="lbl">E-mail *</label><input type="email" name="email" required autocomplete="email">
+        <label class="lbl">Mot de passe * <span class="muted small">(8 caractères minimum)</span></label><input type="password" name="password" required minlength="8" autocomplete="new-password">
+        <label class="lbl">Code communauté Immollia *</label><input type="text" name="code" required placeholder="Remis lors de ton adhésion">
+        <div class="err" id="err-register"></div>
+        <button class="btn" style="width:100%;margin-top:6px">Créer mon accès</button>
+      </form>
+    </div>
+    <p class="muted small" style="text-align:center;margin-top:14px">Réservé aux adhérentes de la communauté Immollia.</p>
+  </div>`;
+}
+function bindAuth(){
+  document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b)); $('#f-login').classList.toggle('hidden',b.dataset.t!=='login'); $('#f-register').classList.toggle('hidden',b.dataset.t!=='register'); });
+  for(const t of ['login','register']){
+    $('#f-'+t).onsubmit = async e=>{ e.preventDefault(); const d=Object.fromEntries(new FormData(e.target)); $('#err-'+t).textContent='';
+      try{ const j=await Store.call(t,d); Store.setToken(j.token); S.user=j.user; await charger(); go('accueil'); }
+      catch(err){ $('#err-'+t).textContent=err.message; } };
+  }
+}
+async function charger(){ const j=await Store.call('carnet'); S.entries=j.entries||{}; try{ S.groupes=(await Store.call('groupes')).groupes||[]; }catch(e){ S.groupes=[]; } }
+
+// ── Accueil ────────────────────────────────────────────────────────────────
+function vueAccueil(){
+  const pct = progression();
+  const sel = comps();
+  const prochaine = [1,2,3,4].find(n=>!faite(n)) || 4;
+  return `<div class="hero">
+    <div class="eyebrow">Bienvenue ${esc(S.user.prenom)}</div>
+    <h1>Ma Zone de <span class="acc">Génie.</span></h1>
+    <p class="citation">« ${REGLE_OR} »</p>
+    <div class="kpi"><div><b>${pct}%</b>du parcours rempli</div><div><b>${[1,2,3,4].filter(faite).length}/4</b>semaines validées</div><div><b>${sel.length}/5</b>compétences clés choisies</div></div>
+    <div class="bar"><i style="width:${pct}%"></i></div>
+    <div class="row" style="margin-top:18px"><button class="btn" data-go="s${prochaine}">Continuer → Semaine ${prochaine}</button><button class="btn sec" data-go="roue">Voir la roue</button></div>
+  </div>
+  <div class="steps">${SEMAINES.map(w=>{ const r=remplis(w.n); return `<div class="step ${faite(w.n)?'done':''}" data-go="s${w.n}">
+      <div class="num">Semaine ${w.n} ${faite(w.n)?'<span class="pill ok">validée</span>':''}</div><h3>${esc(w.titre)}</h3>
+      <div class="muted small">${esc(w.sous)}</div>
+      <div class="bar"><i style="width:${Math.round(100*r.ok/r.total)}%"></i></div><div class="small muted" style="margin-top:4px">${r.ok}/${r.total} réponses</div></div>`; }).join('')}
+  </div>
+  <div class="grid g2" style="margin-top:18px">
+    <div class="card"><h2>Comment ça marche</h2>
+      <ol style="margin:0;padding-left:20px;line-height:1.7">
+        <li><b>4 semaines, en autonomie.</b> Chaque semaine a sa page : tu réponds aux questions à ton rythme, tout s'enregistre automatiquement.</li>
+        <li><b>La roue</b> des 15 compétences de l'intelligence émotionnelle t'aide à nommer tes forces — tu en choisis 5.</li>
+        <li><b>En binôme ou trinôme (optionnel)</b> : crée un groupe, partage le code, et retrouvez-vous chaque semaine en visio d'une heure. L'onglet « Guide visio » donne le déroulé minuté.</li>
+        <li><b>Tu choisis ce que tu partages</b> : semaine par semaine, un interrupteur rend tes réponses visibles à ton groupe. Sinon elles restent privées.</li>
+      </ol></div>
+    <div class="card"><h2>Mon binôme</h2>
+      ${S.groupes.length ? S.groupes.map(g=>`<div class="row sp" style="margin-bottom:8px"><div><b>${esc(g.nom)}</b><div class="small muted">${g.membres} membre${g.membres>1?'s':''} · code <b>${g.code}</b>${g.visio_jour?' · visio '+esc(g.visio_jour):''}</div></div><button class="btn sm" data-go="groupe">Ouvrir</button></div>`).join('')
+        : `<p class="muted">Tu suis le parcours seule pour l'instant. Si tu veux t'entraider avec une ou deux consœurs, crée un groupe et transmets-leur le code.</p><button class="btn sec sm" data-go="groupe">Créer ou rejoindre un groupe</button>`}
+      <hr style="border:0;border-top:1px dashed var(--line);margin:16px 0">
+      <button class="btn sec sm" data-go="impression">🖨 Imprimer / exporter mon carnet en PDF</button>
+    </div>
+  </div>`;
+}
+
+// ── Semaine ────────────────────────────────────────────────────────────────
+function champ(c){
+  return `<div class="q"><div class="qt">${esc(c.q)}<em>${esc(c.e||'')}</em></div><textarea data-k="${c.k}" placeholder="Écris ici… (enregistrement automatique)">${esc(val(c.k))}</textarea><div class="saved" data-k="${c.k}"></div></div>`;
+}
+function vueSemaine(n){
+  const w = SEMAINES[n-1]; const r = remplis(n); const sel = comps();
+  let i = 0;
+  return `<div class="card">
+    <div class="week-head">
+      <div style="flex:1;min-width:260px"><div class="pill mag">Semaine ${n} / 4</div><h1 style="margin-top:8px">${esc(w.titre)}</h1><div class="muted">${esc(w.sous)}</div></div>
+      <div class="objectif"><b>Objectif</b><br>${esc(w.objectif)}</div>
+    </div>
+    ${w.parties.map(p=>`<div class="part"><h3><span class="n">${++i}</span>${esc(p.titre)}</h3>${p.hint?`<div class="hint">${esc(p.hint)}</div>`:''}
+      ${p.champs.map(c=> c.k==='__roue' ? `<div class="q"><div class="qt">${esc(c.q)}<em>${esc(c.e)}</em></div>
+          <div class="selbox">${sel.length? sel.map(id=>{const c=compById(id); return `<span class="pill" style="background:${c.color};color:#fff">${esc(c.nom)}</span>`;}).join('') : '<span class="muted">Aucune compétence choisie pour l\'instant.</span>'}
+          <div style="margin-top:8px"><button class="btn sm" data-go="roue">${sel.length?'Modifier sur la roue':'Choisir sur la roue →'}</button></div></div></div>` : champ(c)).join('')}
+      ${p.comps ? (sel.length ? sel.map(id=>{const c=compById(id); return champ({k:'s2_comp_'+id, q:c.nom, e:c.def});}).join('') : `<p class="muted">Choisis d'abord tes 5 compétences clés sur <a href="#roue" data-go="roue">la roue</a>.</p>`) : ''}
+      ${(p.extra||[]).map(champ).join('')}
+    </div>`).join('')}
+    <div class="week-foot row sp">
+      <div>
+        <label class="switch"><input type="checkbox" id="partage" ${val('partage_s'+n)==='1'?'checked':''}> Partager mes réponses de la semaine ${n} avec mon binôme</label>
+        <div class="small muted">Sans partage, tes réponses restent strictement privées.</div>
+      </div>
+      <div style="text-align:right">
+        <div class="small muted">${r.ok}/${r.total} réponses remplies</div>
+        <label class="switch"><input type="checkbox" id="fait" ${faite(n)?'checked':''}> Semaine ${n} terminée</label>
+      </div>
+    </div>
+    <div class="row sp" style="margin-top:18px">
+      ${n>1?`<button class="btn sec sm" data-go="s${n-1}">← Semaine ${n-1}</button>`:'<span></span>'}
+      ${n<4?`<button class="btn sm" data-go="s${n+1}">Semaine ${n+1} →</button>`:`<button class="btn sm" data-go="accueil">Retour à l'accueil</button>`}
+    </div>
+  </div>`;
+}
+
+// ── Roue ───────────────────────────────────────────────────────────────────
+function arc(cx,cy,r1,r2,a0,a1){ const p=(r,a)=>[cx+r*Math.cos(a),cy+r*Math.sin(a)]; const [x0,y0]=p(r2,a0),[x1,y1]=p(r2,a1),[x2,y2]=p(r1,a1),[x3,y3]=p(r1,a0); const big=(a1-a0)>Math.PI?1:0; return `M${x0},${y0}A${r2},${r2},0,${big},1,${x1},${y1}L${x2},${y2}A${r1},${r1},0,${big},0,${x3},${y3}Z`; }
+function roueSVG(sel, interactive=true){
+  const cx=260,cy=260, n=FAMILLES.length, start=-Math.PI/2 - Math.PI/n; // perception de soi en haut
+  let s='';
+  FAMILLES.forEach((f,i)=>{
+    const a0=start+i*2*Math.PI/n, a1=a0+2*Math.PI/n, am=(a0+a1)/2;
+    s+=`<path d="${arc(cx,cy,100,165,a0+.012,a1-.012)}" fill="${f.c}"/>`;
+    const tx=cx+132*Math.cos(am), ty=cy+132*Math.sin(am); let rot=am*180/Math.PI+90; if(rot>90&&rot<270) rot+=180;
+    const lignes=f.nom.toUpperCase().split(' ');
+    s+=`<text x="${tx}" y="${ty}" transform="rotate(${rot},${tx},${ty})" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">${lignes.length>2?`<tspan x="${tx}" dy="-6">${lignes.slice(0,2).join(' ')}</tspan><tspan x="${tx}" dy="12">${lignes.slice(2).join(' ')}</tspan>`:`<tspan x="${tx}" dy="-6">${lignes[0]}</tspan><tspan x="${tx}" dy="12">${lignes[1]||''}</tspan>`}</text>`;
+    f.comps.forEach((c,j)=>{
+      const b0=a0+j*(a1-a0)/3, b1=b0+(a1-a0)/3, bm=(b0+b1)/2, on=sel.includes(c.id);
+      s+=`<path class="comp ${on?'sel':''}" data-id="${c.id}" d="${arc(cx,cy,168,250,b0+.008,b1-.008)}" fill="${f.c}" opacity="${on?1:.35}"><title>${esc(c.nom)}</title></path>`;
+      const tx=cx+209*Math.cos(bm), ty=cy+209*Math.sin(bm); let rot=bm*180/Math.PI+90; if(rot>90&&rot<270) rot+=180;
+      const mots=c.nom.split(' '); const l1=mots.length>2?mots.slice(0,Math.ceil(mots.length/2)).join(' '):mots[0]; const l2=mots.length>2?mots.slice(Math.ceil(mots.length/2)).join(' '):mots.slice(1).join(' ');
+      s+=`<text x="${tx}" y="${ty}" transform="rotate(${rot},${tx},${ty})" text-anchor="middle" fill="${on?'#fff':'#3a2a44'}" font-size="9.5" font-weight="${on?800:600}"><tspan x="${tx}" dy="${l2?-5:4}">${esc(l1)}</tspan>${l2?`<tspan x="${tx}" dy="11">${esc(l2)}</tspan>`:''}</text>`;
+    });
+  });
+  s+=`<circle cx="${cx}" cy="${cy}" r="92" fill="#fff"/><circle cx="${cx}" cy="${cy}" r="62" fill="url(#g)"/>
+      <text x="${cx}" y="${cy-4}" text-anchor="middle" fill="#fff" font-size="12" font-weight="800">Intelligence</text><text x="${cx}" y="${cy+12}" text-anchor="middle" fill="#fff" font-size="12" font-weight="800">émotionnelle</text>`;
+  return `<svg viewBox="0 0 520 520" ${interactive?'':'class="static"'}><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#C2185B"/><stop offset="1" stop-color="#6A1B9A"/></linearGradient></defs>${s}</svg>`;
+}
+function vueRoue(){
+  const sel = comps();
+  return `<div class="card">
+    <h1>La roue de l'<span class="acc">intelligence émotionnelle.</span></h1>
+    <p class="muted">5 familles, 15 compétences (modèle EQ-i 2.0). Clique sur les compétences qui résonnent avec tes facilités naturelles : <b>5 au maximum</b>. Elles deviennent tes compétences clés pour la suite du parcours.</p>
+    <div class="wheel-wrap">
+      <div class="wheel" id="wheel">${roueSVG(sel)}</div>
+      <div>
+        <div class="selbox"><b>Mes ${sel.length}/5 compétences clés</b><div style="margin-top:6px">${sel.length? sel.map(id=>{const c=compById(id); return `<span class="pill" style="background:${c.color};color:#fff">${esc(c.nom)} ✕</span>`;}).join('') : '<span class="muted">Clique sur la roue ou dans la liste.</span>'}</div>
+          ${sel.length===5?`<div style="margin-top:10px"><button class="btn sm" data-go="s2">Noter mes exemples du terrain (semaine 2) →</button></div>`:''}</div>
+        <div class="comp-list" id="complist">${FAMILLES.map(f=>`<div class="fam" style="color:${f.c}">${esc(f.nom)}</div>${f.comps.map(c=>`<div class="comp ${sel.includes(c.id)?'sel':''}" data-id="${c.id}"><span class="dot" style="background:${f.c}"></span><div><b>${esc(c.nom)}</b><div class="def">${esc(c.def)}</div></div></div>`).join('')}`).join('')}</div>
+      </div>
+    </div>
+  </div>`;
+}
+function toggleComp(id){
+  let sel = comps();
+  if(sel.includes(id)) sel = sel.filter(x=>x!==id);
+  else { if(sel.length>=5){ toast('5 compétences maximum — retire-en une pour en ajouter une autre.'); return; } sel.push(id); }
+  save('s1_competences', JSON.stringify(sel));
+  render();
+}
+
+// ── Groupe ─────────────────────────────────────────────────────────────────
+function vueGroupe(){
+  if(!S.groupes.length) return `<div class="card"><h1>Mon <span class="acc">binôme</span> / trinôme.</h1>
+    <p class="muted">Facultatif, mais précieux : 2 ou 3 personnes qui suivent le parcours en même temps, se retrouvent une heure par semaine en visio, et s'aident à voir ce que chacune ne voit pas chez elle.</p>
+    <div class="grid g2">
+      <div class="card" style="background:#fff"><h3>Créer un groupe</h3><p class="small muted">Tu obtiens un code à 6 caractères à transmettre à tes consœurs.</p><label class="lbl">Nom du groupe (optionnel)</label><input type="text" id="g-nom" placeholder="ex. Binôme Marie & ${esc(S.user.prenom)}"><button class="btn" id="g-creer" style="margin-top:12px">Créer</button></div>
+      <div class="card" style="background:#fff"><h3>Rejoindre un groupe</h3><p class="small muted">Saisis le code reçu.</p><label class="lbl">Code</label><input type="text" id="g-code" placeholder="ABC123" style="text-transform:uppercase;letter-spacing:.2em"><button class="btn sec" id="g-rejoindre" style="margin-top:12px">Rejoindre</button></div>
+    </div><div class="err" id="g-err"></div></div>`;
+  const g = S.groupe;
+  if(!g) return `<div class="card"><p class="muted">Chargement du groupe…</p></div>`;
+  const autres = g.membres.filter(m=>!m.moi);
+  const w = SEMAINES[S.gsem-1];
+  const lignes = w.parties.flatMap(p=>[...p.champs.filter(c=>!c.k.startsWith('__')).map(c=>({k:c.k,q:c.q})), ...(p.extra||[]).map(c=>({k:c.k,q:c.q}))]);
+  if(S.gsem===1) lignes.push({k:'s1_competences', q:'Les 5 compétences clés choisies'});
+  if(S.gsem===2) lignes.push({k:'__exemples', q:'Exemples du terrain par compétence'});
+  const cell = (m,k)=>{ if(!m.moi && !m.partage.includes(S.gsem)) return `<td class="np">non partagé</td>`;
+    if(k==='s1_competences'){ let a=[]; try{a=JSON.parse(m.entries[k]||'[]');}catch(e){} return `<td>${a.map(id=>{const c=compById(id); return c?`<span class="pill" style="background:${c.color};color:#fff;margin:2px">${esc(c.nom)}</span>`:'';}).join('')||'<span class="muted">—</span>'}</td>`; }
+    if(k==='__exemples'){ let a=[]; try{a=JSON.parse(m.entries.s1_competences||'[]');}catch(e){} return `<td>${a.map(id=>{const c=compById(id); const v=m.entries['s2_comp_'+id]; return c&&v?`<b>${esc(c.nom)}</b> — ${esc(v)}\n`:'';}).join('')||'<span class="muted">—</span>'}</td>`; }
+    const v=m.entries[k]; return v?`<td>${esc(v)}</td>`:`<td class="np">—</td>`; };
+  const note = (cible)=>{ const n=g.notes.find(x=>x.auteur===S.user.id&&x.cible===cible.id&&x.semaine===S.gsem); return n?n.texte:''; };
+  const recues = g.notes.filter(x=>x.cible===S.user.id&&x.semaine===S.gsem);
+  const nomDe = id => { const m=g.membres.find(x=>x.id===id); return m?m.prenom:'?'; };
+  return `<div class="card">
+    <div class="row sp"><div><h1>${esc(g.groupe.nom)}</h1><div class="muted small">Code à transmettre pour rejoindre le groupe :</div></div><div class="code">${g.groupe.code}</div></div>
+    <div class="members" style="margin-top:12px">${g.membres.map(m=>`<div class="member">${avatar(m)}<div><b>${esc(m.prenom)} ${esc(m.nom)}</b>${m.moi?' <span class="pill">moi</span>':''}<div class="small muted">${esc(m.agence||'')} · partage : ${m.partage.length?m.partage.map(n=>'S'+n).join(', '):'rien pour l\'instant'}</div></div></div>`).join('')}</div>
+    <div class="grid g2" style="margin-top:16px">
+      <div><label class="lbl">Notre visio hebdo (jour & heure)</label><input type="text" id="v-jour" value="${esc(g.groupe.visio_jour)}" placeholder="ex. mardi 12h30"></div>
+      <div><label class="lbl">Lien visio (Meet, Zoom, Teams…)</label><input type="url" id="v-lien" value="${esc(g.groupe.visio_lien)}" placeholder="https://meet.google.com/…"></div>
+    </div>
+    <div class="row" style="margin-top:10px"><button class="btn sm" id="v-save">Enregistrer la visio</button>${g.groupe.visio_lien?`<a class="btn sec sm" href="${esc(g.groupe.visio_lien)}" target="_blank" rel="noopener">Rejoindre la visio ↗</a>`:''}<button class="btn sec sm" data-go="guide">Déroulé de la séance</button><span style="flex:1"></span><button class="btn sec sm" id="g-quitter" style="border-color:#ccc;color:#888">Quitter le groupe</button></div>
+  </div>
+  <div class="card">
+    <div class="row sp"><h2 style="margin:0">Grille d'audit — vue côte à côte</h2><div class="weektabs">${[1,2,3,4].map(n=>`<button class="${S.gsem===n?'on':''}" data-gsem="${n}">Semaine ${n}</button>`).join('')}</div></div>
+    <p class="small muted">Chacune ne voit que ce que l'autre a choisi de partager (interrupteur en bas de chaque semaine). ${!val('partage_s'+S.gsem)||val('partage_s'+S.gsem)!=='1'?`<b>Tes réponses de la semaine ${S.gsem} ne sont pas partagées.</b> <a href="#s${S.gsem}" data-go="s${S.gsem}">Activer le partage</a>.`:''}</p>
+    <div style="overflow:auto"><table class="audit"><thead><tr><th>${esc(w.titre)}</th>${g.membres.map(m=>`<th><span class="row" style="gap:8px">${avatar(m)}${esc(m.prenom)}${m.moi?' (moi)':''}</span></th>`).join('')}</tr></thead>
+      <tbody>${lignes.map(l=>`<tr><th>${esc(l.q)}</th>${g.membres.map(m=>cell(m,l.k)).join('')}</tr>`).join('')}</tbody></table></div>
+  </div>
+  <div class="card">
+    <h2>Notes de binôme — semaine ${S.gsem}</h2>
+    <p class="small muted">Ce que tu observes chez l'autre et qu'elle ne voit pas forcément : ses facilités, ses blocages à lever (« casser le paradoxe de la facilité »). Reste bienveillante et concrète.</p>
+    <div class="grid g2">
+      ${autres.length? autres.map(m=>`<div><label class="lbl">Mes notes pour ${esc(m.prenom)}</label><textarea data-note="${m.id}" placeholder="Ce que je remarque chez ${esc(m.prenom)}…">${esc(note(m))}</textarea><div class="saved" data-nk="${m.id}"></div></div>`).join('') : '<p class="muted">Tu es seule dans ce groupe pour l\'instant — transmets le code !</p>'}
+      <div><label class="lbl">Ce que mon binôme a noté pour moi</label>${recues.length? recues.map(n=>`<div class="card" style="background:#fff;padding:12px;margin-bottom:8px"><b>${esc(nomDe(n.auteur))}</b><div style="white-space:pre-wrap">${esc(n.texte)}</div></div>`).join('') : '<p class="muted">Rien pour l\'instant.</p>'}</div>
+    </div>
+  </div>`;
+}
+async function chargerGroupe(){ if(!S.groupes.length){ S.groupe=null; return; } try{ S.groupe = await Store.call('groupe',{id:S.groupes[0].id}); }catch(e){ toast(e.message,4000); S.groupe=null; } }
+
+// ── Guide visio ────────────────────────────────────────────────────────────
+function vueGuide(){
+  return `<div class="card"><h1>Guide de la <span class="acc">visio</span> hebdomadaire.</h1>
+    <p class="muted">Format : binôme ou trinôme · 1 visioconférence d'une heure par semaine pendant 4 semaines · travail en autonomie dans l'application entre les séances. L'une de vous tient la montre et déroule le plan ci-dessous ; chacune a son carnet ouvert.</p>
+    <div class="grid g2">
+      <div class="card" style="background:#fff"><h3>Ce qu'il faut valoriser</h3><p>Le focus, le plaisir dans le travail, l'authenticité, la délégation.</p></div>
+      <div class="card" style="background:#fff"><h3>Ce qu'il faut recadrer gentiment</h3><p>La volonté de tout contrôler, la peur de ne pas paraître légitime en faisant « moins », le piège de la polyvalence.</p></div>
+    </div></div>
+    ${GUIDE.map(g=>`<div class="card"><div class="pill mag">Semaine ${g.n}</div><h2 style="margin-top:8px">${esc(g.titre)}</h2>
+      <div class="agenda">${g.items.map(([t,h,l])=>`<div class="it"><div class="t">${t}</div><div><b>${esc(h)}</b><ul>${l.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div></div>`).join('')}</div>
+      <div class="row" style="margin-top:12px"><button class="btn sm" data-go="s${g.n}">Ouvrir ma semaine ${g.n}</button><button class="btn sec sm" data-go="groupe">Voir la grille du binôme</button></div></div>`).join('')}`;
+}
+
+// ── Profil ─────────────────────────────────────────────────────────────────
+function vueProfil(){
+  const u=S.user;
+  return `<div class="card" style="max-width:560px"><h1>Mon profil</h1>
+    <form id="f-profil">
+      <div class="photo-row">${avatar(u,'lg')}<div><input type="file" id="photo-file" accept="image/*" class="hidden"><button type="button" class="btn sec sm" id="photo-pick">📷 ${u.photo?'Changer ma photo':'Ajouter une photo'}</button> ${u.photo?'<button type="button" class="btn sec sm" id="photo-del" style="margin-left:6px">Supprimer</button>':''}<div class="small muted" style="margin-top:6px">Recadrée en carré automatiquement, visible par ton binôme.</div></div></div>
+      <div class="grid g2" style="gap:0 12px"><div><label class="lbl">Prénom</label><input type="text" name="prenom" value="${esc(u.prenom)}" required></div><div><label class="lbl">Nom</label><input type="text" name="nom" value="${esc(u.nom||'')}"></div></div>
+      <label class="lbl">Agence / activité</label><input type="text" name="agence" value="${esc(u.agence||'')}">
+      <label class="lbl">E-mail</label><input type="email" value="${esc(u.email)}" disabled>
+      <label class="lbl">Nouveau mot de passe <span class="muted small">(laisser vide pour ne pas changer)</span></label><input type="password" name="password" autocomplete="new-password">
+      <div class="err" id="err-profil"></div>
+      <div class="row" style="margin-top:8px"><button class="btn">Enregistrer</button><button type="button" class="btn sec" id="logout">Me déconnecter</button></div>
+    </form></div>`;
+}
+
+// ── Impression ─────────────────────────────────────────────────────────────
+function vueImpression(){
+  const sel=comps();
+  return `<div class="row sp no-print" style="margin-bottom:14px"><button class="btn sec sm" data-go="accueil">← Retour</button><button class="btn sm" onclick="window.print()">🖨 Imprimer / Enregistrer en PDF</button></div>
+  <div class="card"><div class="row"><img src="logo-immollia.webp" style="height:60px"><div><h1 style="margin:0">Mon carnet de bord — Zone de Génie</h1><div class="muted">${esc(S.user.prenom)} ${esc(S.user.nom||'')} · ${esc(S.user.agence||'')} · ${new Date().toLocaleDateString('fr-FR')}</div></div></div>
+    <p class="citation" style="margin-top:12px">« ${REGLE_OR} »</p>
+    <h3>Mes 5 compétences clés</h3>${sel.length?sel.map(id=>{const c=compById(id);return `<span class="pill" style="background:${c.color};color:#fff;margin:2px">${esc(c.nom)}</span>`;}).join(''):'<span class="muted">—</span>'}</div>
+  ${SEMAINES.map(w=>`<div class="card"><div class="pill mag">Semaine ${w.n}</div><h2 style="margin-top:6px">${esc(w.titre)}</h2>
+    ${w.parties.map(p=>`<h3 style="margin-top:14px">${esc(p.titre)}</h3>${[...p.champs.filter(c=>!c.k.startsWith('__')),...(p.comps?sel.map(id=>({k:'s2_comp_'+id,q:compById(id).nom})):[]),...(p.extra||[])].map(c=>`<div class="q"><div class="qt">${esc(c.q)}</div><div style="white-space:pre-wrap;padding:8px 12px;border:1px solid var(--line);border-radius:10px;min-height:40px">${esc(val(c.k))||'<span class="muted">—</span>'}</div></div>`).join('')}`).join('')}</div>`).join('')}`;
+}
+
+// ── Liaisons d'événements ──────────────────────────────────────────────────
+function bind(p){
+  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=e=>{ e.preventDefault(); go(b.dataset.go); });
+  document.querySelectorAll('textarea[data-k]').forEach(t=>t.oninput=()=>{ const s=document.querySelector(`.saved[data-k="${t.dataset.k}"]`); if(s) s.textContent='…'; save(t.dataset.k, t.value); });
+  if(/^s[1-4]$/.test(p)){
+    const n=+p[1];
+    $('#partage').onchange=e=>save('partage_s'+n, e.target.checked?'1':'0', ()=>toast(e.target.checked?'Réponses partagées avec ton binôme':'Réponses redevenues privées'));
+    $('#fait').onchange=e=>save('fait_s'+n, e.target.checked?'1':'0', ()=>toast(e.target.checked?'Bravo — semaine '+n+' validée ✨':'Semaine '+n+' rouverte'));
+  }
+  if(p==='roue'){ document.querySelectorAll('#wheel path.comp, #complist .comp').forEach(el=>el.onclick=()=>toggleComp(el.dataset.id)); }
+  if(p==='groupe'){
+    const err=$('#g-err');
+    if($('#g-creer')) $('#g-creer').onclick=async()=>{ try{ const j=await Store.call('groupe_creer',{nom:$('#g-nom').value}); S.groupes=j.groupes; await chargerGroupe(); render(); toast('Groupe créé — code '+j.code); }catch(e){ err.textContent=e.message; } };
+    if($('#g-rejoindre')) $('#g-rejoindre').onclick=async()=>{ try{ const j=await Store.call('groupe_rejoindre',{code:$('#g-code').value}); S.groupes=j.groupes; await chargerGroupe(); render(); toast('Bienvenue dans le groupe !'); }catch(e){ err.textContent=e.message; } };
+    if($('#g-quitter')) $('#g-quitter').onclick=async()=>{ if(!confirm('Quitter ce groupe ? Tes réponses restent dans ton carnet.')) return; const j=await Store.call('groupe_quitter',{id:S.groupe.groupe.id}); S.groupes=j.groupes; S.groupe=null; render(); };
+    if($('#v-save')) $('#v-save').onclick=async()=>{ await Store.call('groupe_visio',{id:S.groupe.groupe.id,visio_jour:$('#v-jour').value,visio_lien:$('#v-lien').value}); await chargerGroupe(); render(); toast('Visio enregistrée'); };
+    document.querySelectorAll('[data-gsem]').forEach(b=>b.onclick=()=>{ S.gsem=+b.dataset.gsem; render(); });
+    document.querySelectorAll('textarea[data-note]').forEach(t=>{ let tm; t.oninput=()=>{ clearTimeout(tm); const s=document.querySelector(`.saved[data-nk="${t.dataset.note}"]`); s.textContent='…'; tm=setTimeout(async()=>{ try{ await Store.call('note',{group_id:S.groupe.groupe.id,cible:+t.dataset.note,semaine:S.gsem,texte:t.value}); s.textContent='✓ enregistré'; const i=S.groupe.notes.findIndex(x=>x.auteur===S.user.id&&x.cible===+t.dataset.note&&x.semaine===S.gsem); const n={auteur:S.user.id,cible:+t.dataset.note,semaine:S.gsem,texte:t.value}; if(i>=0) S.groupe.notes[i]=n; else S.groupe.notes.push(n); }catch(e){ toast('⚠ '+e.message,4000); } },700); }; });
+  }
+  if(p==='profil'){
+    $('#f-profil').onsubmit=async e=>{ e.preventDefault(); const d=Object.fromEntries(new FormData(e.target)); if(!d.password) delete d.password; try{ await Store.call('profil',d); Object.assign(S.user,{prenom:d.prenom,nom:d.nom,agence:d.agence}); toast('Profil enregistré'); render(); }catch(err){ $('#err-profil').textContent=err.message; } };
+    $('#photo-pick').onclick=()=>$('#photo-file').click();
+    $('#photo-file').onchange=async e=>{ const f=e.target.files[0]; if(!f) return; try{ const data=await redimensionner(f,320); await Store.call('profil',{photo:data}); S.user.photo=data; toast('Photo enregistrée'); render(); }catch(err){ toast('⚠ '+err.message,4000); } };
+    if($('#photo-del')) $('#photo-del').onclick=async()=>{ await Store.call('profil',{photo:''}); S.user.photo=null; toast('Photo supprimée'); render(); };
+    $('#logout').onclick=async()=>{ try{ await Store.call('logout'); }catch(e){} Store.setToken(''); S.user=null; S.entries={}; S.groupes=[]; S.groupe=null; location.hash=''; render(); };
+  }
+}
+
+// Réduit et recadre une image en carré (canvas) → data URL JPEG légère.
+function redimensionner(file, taille){
+  return new Promise((ok,ko)=>{
+    const img=new Image(); const url=URL.createObjectURL(file);
+    img.onload=()=>{ URL.revokeObjectURL(url); const c=document.createElement('canvas'); c.width=c.height=taille; const x=c.getContext('2d'); const m=Math.min(img.width,img.height); x.drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,taille,taille); ok(c.toDataURL('image/jpeg',.82)); };
+    img.onerror=()=>{ URL.revokeObjectURL(url); ko(new Error('Image illisible.')); };
+    img.src=url;
+  });
+}
+
+// ── Démarrage ──────────────────────────────────────────────────────────────
+(async function(){
+  await Store.detect();
+  if(Store.mode==='demo' && localStorage.getItem('zg_demo_user')) Store.setToken('demo');
+  if(Store.token){ try{ const j=await Store.call('me'); S.user=j.user; await charger(); }catch(e){ Store.setToken(''); } }
+  const h=location.hash.slice(1); if(S.user && h) S.page=h;
+  render();
+  if(S.user && S.page==='groupe'){ await chargerGroupe(); render(); }
+  // Quand on arrive sur l'onglet groupe, on recharge les données du groupe.
+  const _go = go; window.go = async p=>{ _go(p); if(p==='groupe' && S.groupes.length){ await chargerGroupe(); render(); } };
+  document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>window.go(b.dataset.p));
+})();
+</script>
+</body>
+</html>

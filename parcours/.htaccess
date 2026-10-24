@@ -1,0 +1,9 @@
+# Parcours Zone de Génie : transmettre l'en-tête « Authorization » (jeton de connexion) à zg-api.php
+<IfModule mod_setenvif.c>
+    SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+</IfModule>
+
+# Application réservée aux adhérentes : pas dans les moteurs de recherche
+<IfModule mod_headers.c>
+    Header set X-Robots-Tag "noindex, nofollow"
+</IfModule>

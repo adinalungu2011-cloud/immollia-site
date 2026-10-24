@@ -5,6 +5,7 @@ Site vitrine de l'association IMMOLLIA (immollia.fr). Site statique : HTML, CSS,
 - `index.html` : page d'accueil
 - `zone-de-genie.html` : le parcours Zone de Génie
 - `annuaire.html` : annuaire des membres (liste `MEMBERS` en bas du fichier)
+- `parcours/` : application du parcours Zone de Génie (voir `parcours/LISEZMOI.md`), pas encore installée sur le serveur
 - `assets/` : styles, script, logo, portraits, logos partenaires
 - `A-VALIDER.md` : points restant à valider avant publication
 
