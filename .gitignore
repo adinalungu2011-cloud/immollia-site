@@ -3,3 +3,6 @@ config.php
 
 # Fichiers du Mac
 .DS_Store
+
+# Réglages locaux de Claude (aperçu)
+.claude/

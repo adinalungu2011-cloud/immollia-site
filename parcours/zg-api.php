@@ -1,6 +1,6 @@
 <?php
 // ═══════════════════════════════════════════════════════════════════════════
-// IMMOLLIA — Parcours « Zone de Génie » — API (PHP + MariaDB/MySQL)
+// IMMOLLIA — Parcours « Zone de Génie » — API (PHP + SQLite ou MariaDB/MySQL)
 //
 // Application autonome : à déposer telle quelle sur l'hébergement d'immollia.fr
 // (ex. sous-domaine  parcours.immollia.fr  → dossier contenant index.html,
@@ -14,8 +14,11 @@
 //     avec son groupe. Les membres peuvent se laisser des « notes de binôme ».
 //   • Les animatrices (ZG_ADMINS) voient tous les groupes.
 //
+// Stockage : SQLite si config.php définit ZG_DB_SQLITE (chemin d'un fichier hors du dossier web,
+// c'est le cas sur immollia.fr), sinon MariaDB/MySQL avec ZG_DB_HOST/NAME/USER/PASS.
+//
 // Appels : POST zg-api.php?action=…  (JSON)  — jeton « Authorization: Bearer … »
-// v1 — 2026-10-16
+// v1 — 2026-10-16 · v1.2 — 2026-10-27 : SQLite
 // ═══════════════════════════════════════════════════════════════════════════
 
 if (!is_file(__DIR__ . '/config.php')) {
@@ -31,7 +34,7 @@ header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
 
-const ZG_VERSION    = 'v1.1';
+const ZG_VERSION    = 'v1.2';
 const ZG_SESSION_J  = 60;        // durée d'une session (jours)
 const ZG_MAX_CHAMP  = 20000;     // taille max d'une réponse (caractères)
 
@@ -58,10 +61,27 @@ function bearer(): string {
     }
     return preg_match('/Bearer\s+(.+)/i', $h, $m) ? trim($m[1]) : '';
 }
+date_default_timezone_set('Europe/Paris');
+function sqlite(): bool { return defined('ZG_DB_SQLITE'); }
+function maintenant(int $jours = 0): string { return date('Y-m-d H:i:s', time() + $jours * 86400); }
+// « Insérer ou remplacer » : la syntaxe diffère entre SQLite et MySQL.
+function sql_upsert(string $table, array $cols, array $cle, array $maj): string {
+    $sql = 'INSERT INTO ' . $table . ' (' . implode(', ', $cols) . ') VALUES (' . implode(',', array_fill(0, count($cols), '?')) . ')';
+    if (sqlite()) return $sql . ' ON CONFLICT (' . implode(', ', $cle) . ') DO UPDATE SET ' . implode(', ', array_map(fn($c) => "$c = excluded.$c", $maj));
+    return $sql . ' ON DUPLICATE KEY UPDATE ' . implode(', ', array_map(fn($c) => "$c = VALUES($c)", $maj));
+}
 function db(): PDO {
     static $pdo = null;
     if ($pdo) return $pdo;
     try {
+        if (sqlite()) {
+            $pdo = new PDO('sqlite:' . ZG_DB_SQLITE, null, null,
+                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
+            $pdo->exec('PRAGMA busy_timeout = 5000');
+            $pdo->exec('PRAGMA journal_mode = WAL');
+            installer_sqlite($pdo);
+            return $pdo;
+        }
         $pdo = new PDO(
             'mysql:host=' . ZG_DB_HOST . ';dbname=' . ZG_DB_NAME . ';charset=utf8mb4',
             ZG_DB_USER, ZG_DB_PASS,
@@ -129,6 +149,57 @@ function installer(PDO $pdo): void {
         UNIQUE KEY u (group_id, auteur_id, cible_id, semaine)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 }
+// Mêmes tables qu'en MySQL, en syntaxe SQLite (les dates sont écrites en heure de Paris).
+function installer_sqlite(PDO $pdo): void {
+    $now = "DEFAULT (datetime('now','localtime'))";
+    $pdo->exec("CREATE TABLE IF NOT EXISTS zg_users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL,
+        prenom TEXT NOT NULL,
+        nom TEXT NOT NULL DEFAULT '',
+        agence TEXT NOT NULL DEFAULT '',
+        photo TEXT NULL,
+        actif INTEGER NOT NULL DEFAULT 1,
+        created_at TEXT NOT NULL $now,
+        last_login TEXT NULL
+    )");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS zg_sessions (token TEXT PRIMARY KEY, user_id INTEGER NOT NULL, expires_at TEXT NOT NULL)");
+    $pdo->exec("CREATE INDEX IF NOT EXISTS zg_sessions_user ON zg_sessions (user_id)");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS zg_entries (
+        user_id INTEGER NOT NULL,
+        cle TEXT NOT NULL,
+        valeur TEXT NOT NULL,
+        updated_at TEXT NOT NULL $now,
+        PRIMARY KEY (user_id, cle)
+    )");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS zg_groups (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        code TEXT NOT NULL UNIQUE,
+        nom TEXT NOT NULL,
+        createur_id INTEGER NOT NULL,
+        visio_jour TEXT NOT NULL DEFAULT '',
+        visio_lien TEXT NOT NULL DEFAULT '',
+        created_at TEXT NOT NULL $now
+    )");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS zg_group_members (
+        group_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        joined_at TEXT NOT NULL $now,
+        PRIMARY KEY (group_id, user_id)
+    )");
+    $pdo->exec("CREATE INDEX IF NOT EXISTS zg_group_members_user ON zg_group_members (user_id)");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS zg_notes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        group_id INTEGER NOT NULL,
+        auteur_id INTEGER NOT NULL,
+        cible_id INTEGER NOT NULL,
+        semaine INTEGER NOT NULL,
+        texte TEXT NOT NULL,
+        updated_at TEXT NOT NULL $now,
+        UNIQUE (group_id, auteur_id, cible_id, semaine)
+    )");
+}
 function est_admin(string $email): bool {
     $l = array_filter(array_map('trim', explode(',', strtolower(defined('ZG_ADMINS') ? ZG_ADMINS : ''))));
     return in_array(strtolower($email), $l, true);
@@ -138,8 +209,8 @@ function utilisateur(): array {
     if ($t === '' || strlen($t) !== 64) erreur('Connexion requise.', 401);
     $s = db()->prepare('SELECT u.id, u.email, u.prenom, u.nom, u.agence, u.photo, u.actif
                         FROM zg_sessions s JOIN zg_users u ON u.id = s.user_id
-                        WHERE s.token = ? AND s.expires_at > NOW()');
-    $s->execute([$t]);
+                        WHERE s.token = ? AND s.expires_at > ?');
+    $s->execute([$t, maintenant()]);
     $u = $s->fetch();
     if (!$u) erreur('Session expirée, reconnecte-toi.', 401);
     if (!(int)$u['actif']) erreur('Compte désactivé.', 403);
@@ -151,9 +222,9 @@ function profil_public(array $u): array {
 }
 function ouvrir_session(int $uid): string {
     $t = bin2hex(random_bytes(32));
-    db()->prepare('INSERT INTO zg_sessions (token, user_id, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL ? DAY))')
-        ->execute([$t, $uid, ZG_SESSION_J]);
-    db()->prepare('UPDATE zg_users SET last_login = NOW() WHERE id = ?')->execute([$uid]);
+    db()->prepare('INSERT INTO zg_sessions (token, user_id, expires_at) VALUES (?, ?, ?)')
+        ->execute([$t, $uid, maintenant(ZG_SESSION_J)]);
+    db()->prepare('UPDATE zg_users SET last_login = ? WHERE id = ?')->execute([maintenant(), $uid]);
     return $t;
 }
 // Clés autorisées dans le carnet (empêche de stocker n'importe quoi).
@@ -256,13 +327,13 @@ if ($action === 'carnet') {
 if ($action === 'sauver') {
     $entries = $body['entries'] ?? null;
     if (!is_array($entries) || !$entries) erreur('Rien à enregistrer.');
-    $st = $db->prepare('INSERT INTO zg_entries (user_id, cle, valeur) VALUES (?,?,?) ON DUPLICATE KEY UPDATE valeur = VALUES(valeur)');
+    $st = $db->prepare(sql_upsert('zg_entries', ['user_id', 'cle', 'valeur', 'updated_at'], ['user_id', 'cle'], ['valeur', 'updated_at']));
     $n = 0;
     foreach ($entries as $k => $v) {
         if (!cle_valide((string)$k)) continue;
         $v = is_string($v) ? $v : json_encode($v, JSON_UNESCAPED_UNICODE);
         if (mb_strlen($v) > ZG_MAX_CHAMP) $v = mb_substr($v, 0, ZG_MAX_CHAMP);
-        $st->execute([$me['id'], $k, $v]); $n++;
+        $st->execute([$me['id'], $k, $v, maintenant()]); $n++;
     }
     rep(200, ['ok' => true, 'n' => $n, 'updated_at' => date('Y-m-d H:i:s')]);
 }
@@ -312,7 +383,7 @@ if ($action === 'groupe_rejoindre') {
     if (!$g) erreur('Aucun groupe avec ce code.', 404);
     $c = $db->prepare('SELECT COUNT(*) FROM zg_group_members WHERE group_id = ?'); $c->execute([$g['id']]);
     if ((int)$c->fetchColumn() >= 4) erreur('Ce groupe est complet (4 personnes maximum).', 409);
-    $db->prepare('INSERT IGNORE INTO zg_group_members (group_id, user_id) VALUES (?,?)')->execute([$g['id'], $me['id']]);
+    $db->prepare((sqlite() ? 'INSERT OR IGNORE' : 'INSERT IGNORE') . ' INTO zg_group_members (group_id, user_id) VALUES (?,?)')->execute([$g['id'], $me['id']]);
     rep(200, ['ok' => true, 'id' => (int)$g['id'], 'groupes' => mes_groupes($db, $me)]);
 }
 
@@ -373,8 +444,8 @@ if ($action === 'note') {
     if (!membre_de($db, $me, $gid)) erreur('Tu ne fais pas partie de ce groupe.', 403);
     if ($sem < 1 || $sem > 4) erreur('Semaine invalide.');
     if (mb_strlen($texte) > ZG_MAX_CHAMP) $texte = mb_substr($texte, 0, ZG_MAX_CHAMP);
-    $db->prepare('INSERT INTO zg_notes (group_id, auteur_id, cible_id, semaine, texte) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE texte = VALUES(texte)')
-       ->execute([$gid, $me['id'], $cible, $sem, $texte]);
+    $db->prepare(sql_upsert('zg_notes', ['group_id', 'auteur_id', 'cible_id', 'semaine', 'texte', 'updated_at'], ['group_id', 'auteur_id', 'cible_id', 'semaine'], ['texte', 'updated_at']))
+       ->execute([$gid, $me['id'], $cible, $sem, $texte, maintenant()]);
     rep(200, ['ok' => true]);
 }
 
@@ -382,7 +453,7 @@ if ($action === 'note') {
 if ($action === 'admin_adherentes') {
     if (!$me['admin']) erreur('Réservé aux animatrices.', 403);
     $s = $db->query('SELECT u.id, u.prenom, u.nom, u.agence, u.email, u.created_at, u.last_login,
-                       (SELECT COUNT(*) FROM zg_entries e WHERE e.user_id = u.id AND e.cle LIKE "s%" AND e.valeur <> "") AS champs
+                       (SELECT COUNT(*) FROM zg_entries e WHERE e.user_id = u.id AND e.cle LIKE \'s%\' AND e.valeur <> \'\') AS champs
                      FROM zg_users u ORDER BY u.created_at DESC');
     rep(200, ['ok' => true, 'adherentes' => $s->fetchAll()]);
 }
