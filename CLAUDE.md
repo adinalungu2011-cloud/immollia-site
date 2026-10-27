@@ -57,8 +57,10 @@ Ces actions vivent dans `api.php` du dépôt adressefinder : les modifier = dép
   `www.immollia.fr/parcours/`. `index.html` (interface) + `zg-api.php` (serveur, crée ses tables tout seul)
   + `config.example.php` (modèle) ; détails dans `parcours/LISEZMOI.md`.
   Rapatriée le 24/10/2026 depuis la branche `claude/zealous-goldberg-iih3sm` d'adressefinder (branche gardée).
-- **Pas encore installée sur le serveur** : il manque la base MariaDB et `parcours/config.php` (jamais committé,
-  bloqué par `.gitignore` et `.htaccess`). Tant qu'il manque, `zg-api.php` répond « pas encore configuré » et
-  l'interface passe en **mode démo** (réponses gardées dans le navigateur seulement). D'ici là,
-  `parcours/.htaccess` renvoie `/parcours/` vers `zone-de-genie.html` (la règle s'arrête dès que `config.php` existe). Pour l'installer sans cPanel : ajouter une action dans `api.php` d'adressefinder
-  (comme `immollia_update`) qui crée la base et écrit `config.php` hors dépôt — avec l'accord d'Adina.
+- **Installée le 27/10/2026**, en **SQLite** : o2switch interdit de créer une base MariaDB depuis PHP (uapi bloqué),
+  donc les données vivent dans `~/immollia-data/parcours.sqlite` (hors dossier web). Les réglages sont dans
+  `parcours/config.php` sur le serveur (jamais committé, illisible depuis le web), écrit par l'action
+  **`immollia_parcours`** de `api.php` d'adressefinder (même jeton, passé en en-tête `X-Maint-Token`) :
+  `GET` = état (base, tables, nombre d'adhérentes) ; `POST {"code":"…","admins":"a@x.fr,b@y.fr"}` = change le
+  code communauté et les animatrices sans toucher aux données. Le code communauté n'est écrit **nulle part** dans le dépôt.
+  La règle de `parcours/.htaccess` (renvoi vers la présentation si `config.php` manque) ne joue plus.

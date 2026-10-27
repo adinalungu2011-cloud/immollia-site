@@ -31,7 +31,13 @@ trinômes en option.
 - **Mode démo** : si `zg-api.php` ne répond pas (par ex. ouverture du fichier sans serveur), l'application
   bascule sur le stockage du navigateur avec un binôme fictif « Camille » pour illustrer la vue groupe.
 
-## Installation sur l'hébergement (o2switch ou autre PHP 8 + MariaDB)
+## Installation sur immollia.fr (faite le 27/10/2026)
+
+Stockage **SQLite** : `config.php` définit `ZG_DB_SQLITE` (fichier `~/immollia-data/parcours.sqlite`, hors du
+dossier web). Il est écrit par l'action `immollia_parcours` du site de l'agence (voir `CLAUDE.md` à la racine).
+Sans `ZG_DB_SQLITE`, l'application utilise MariaDB comme décrit ci-dessous.
+
+## Installation sur un autre hébergement (PHP 8 + MariaDB)
 
 1. Dans cPanel, créer une base MariaDB + un utilisateur (droits complets).
 2. Déposer les 4 fichiers dans le dossier cible (voir « Où l'intégrer » ci-dessous).
