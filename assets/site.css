@@ -452,3 +452,12 @@ footer a:hover { color: var(--accent); }
 .form-done { display: flex; flex-direction: column; gap: 0.9rem; align-items: flex-start; padding: 1.5rem 0; }
 .form-done h3 { font: 800 1.6rem var(--font-display); color: var(--ink); }
 .form-done p { color: var(--ink-soft); }
+
+/* Presse : carte large (photo d'événement en paysage) */
+.press-card--wide { grid-column: 1 / -1; grid-template-columns: minmax(0, 1.25fr) 1fr; align-items: center; }
+.press-card--wide:hover { border-color: var(--line); }
+.press-card--wide .press-thumb { aspect-ratio: 4 / 3; }
+.press-card--wide h3 { font-size: 1.45rem; }
+.press-card--wide p { font-size: 1rem; }
+.press-logo { width: 130px; height: auto; margin-top: 0.75rem; }
+@media (max-width: 880px) { .press-card--wide { grid-template-columns: 1fr; } }
