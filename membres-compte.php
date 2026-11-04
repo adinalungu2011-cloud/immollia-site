@@ -1,9 +1,9 @@
 <?php
-// IMMOLLIA — compteur de membres affiché sur le site (« 47 membres »).
+// IMMOLLIA — compteur de membres affiché sur le site (« 50 membres »).
 // = membres déjà présentes avant le site + chaque nouvelle inscription (une fois par adresse e-mail).
 // Ne sont pas comptés : les essais (prénom ou nom contenant « test ») et les 5 membres fondatrices,
 // déjà incluses dans le chiffre de départ (reconnues par prénom + nom, accents et tirets ignorés).
-const IMMOLLIA_MEMBRES_AVANT_SITE = 47; // à ajuster à la main si besoin
+const IMMOLLIA_MEMBRES_AVANT_SITE = 50; // à ajuster à la main si besoin
 const IMMOLLIA_FONDATRICES = [
     ['adina', 'lungu'], ['anne', 'boucaut'], ['anne', 'basso'], ['audrey', 'morvan'],
     ['elodie', 'mauge'], ['emilie', 'viala'],
@@ -28,8 +28,8 @@ function immollia_membres() {
     $fichier = $home . '/immollia-data/inscriptions.csv';
     $emails = [];
     if (is_file($fichier) && ($fh = @fopen($fichier, 'r'))) {
-        fgetcsv($fh, 0, ';'); // ligne d'en-tête
-        while (($l = fgetcsv($fh, 0, ';')) !== false) {
+        fgetcsv($fh, 0, ';', '"', '\\'); // ligne d'en-tête
+        while (($l = fgetcsv($fh, 0, ';', '"', '\\')) !== false) {
             if (count($l) < 4) continue;
             if (stripos($l[1] . ' ' . $l[2], 'test') !== false) continue;
             if (immollia_est_fondatrice($l[1], $l[2])) continue;

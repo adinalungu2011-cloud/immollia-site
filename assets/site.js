@@ -40,22 +40,59 @@
       });
     });
 
-    // Formulaire : vérifie les champs, n'envoie rien (pas encore connecté)
+    // Formulaire : « Rejoindre la communauté » = inscription (compteur de membres + lien WhatsApp),
+    // les autres motifs = message envoyé à contact@immollia.fr
+    var WHATSAPP_URL = 'https://chat.whatsapp.com/Djf761IEdpFA8f8ASbIshz';
     var out = document.getElementById('form-result');
+    var envoi = form.querySelector('button[type="submit"]');
+    var erreur = function (t, champ) {
+      out.hidden = false; out.className = 'form-status form-status--error'; out.textContent = t;
+      if (champ) champ.focus();
+    };
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      out.hidden = false;
+      out.hidden = true;
+      var g = function (n) { var el = form.elements[n]; return el ? String(el.value || '').trim() : ''; };
+      var motif = (form.querySelector('input[name="motif"]:checked') || {}).value || 'rejoindre';
       if (!form.checkValidity()) {
         var bad = form.querySelector(':invalid');
-        out.className = 'form-status form-status--error';
-        out.textContent = bad && bad.type === 'email' && bad.value
+        return erreur(bad && bad.type === 'email' && bad.value
           ? "L'adresse e-mail semble incomplète. Vérifiez-la puis réessayez."
-          : 'Merci de remplir votre nom, votre e-mail, votre activité et un message.';
-        if (bad) bad.focus();
-        return;
+          : 'Merci de remplir votre prénom, votre nom, votre e-mail, votre téléphone et votre activité.', bad);
       }
-      out.className = 'form-status';
-      out.textContent = "Message non envoyé : ce formulaire n'est pas encore relié à contact@immollia.fr. Les champs sont bien remplis, mais rien n'a été transmis.";
+      if (motif !== 'rejoindre' && !g('message')) return erreur('Merci d\'écrire un petit message.', msg);
+      var data = { motif: motif, prenom: g('prenom'), nom: g('nom'), email: g('email'), tel: g('tel'),
+        activite: g('activite'), ville: g('ville'), message: g('message'), site: g('site'), source: 'accueil' };
+      envoi.disabled = true;
+      fetch(motif === 'rejoindre' ? 'inscription.php' : 'contact.php', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+      }).then(function (r) { return r.json(); }).then(function (j) {
+        envoi.disabled = false;
+        if (!j || !j.ok) return erreur((j && j.message) || 'Envoi impossible pour le moment. Réessayez dans un instant.');
+        var ok = document.createElement('div');
+        ok.className = 'form-done';
+        ok.setAttribute('tabindex', '-1');
+        var h = document.createElement('h3'), p = document.createElement('p');
+        if (motif === 'rejoindre') {
+          h.textContent = 'Bienvenue, ' + data.prenom + ' !';
+          p.textContent = (j.membres ? 'Vous êtes la ' + j.membres + 'e membre de la communauté IMMOLLIA 🎉 ' : '')
+            + 'Dernière étape : rejoignez la communauté sur WhatsApp.';
+          if (j.membres) document.querySelectorAll('[data-membres]').forEach(function (el) { el.textContent = j.membres; });
+          var wa = document.createElement('a');
+          wa.href = WHATSAPP_URL; wa.target = '_blank'; wa.rel = 'noopener';
+          wa.className = 'btn btn--primary'; wa.textContent = 'Rejoindre la communauté WhatsApp';
+          ok.append(h, p, wa);
+        } else {
+          h.textContent = 'Merci, ' + data.prenom + ' !';
+          p.textContent = 'Votre message est bien envoyé. Une membre de l\'équipe vous répond personnellement.';
+          ok.append(h, p);
+        }
+        form.replaceChildren(ok);
+        ok.focus();
+      }, function () {
+        envoi.disabled = false;
+        erreur('Connexion impossible. Vérifiez votre réseau puis réessayez.');
+      });
     });
   }
 

@@ -44,7 +44,7 @@
           <p class="motto" aria-label="Inspirer. Fédérer. Rayonner."><span>Inspirer</span><i></i><span>Fédérer</span><i></i><span>Rayonner</span></p>
           <p class="lead">Négociatrice, mandataire, gestionnaire ou dirigeante : IMMOLLIA réunit celles qui veulent progresser, partager leurs expériences et développer leur réseau. Pour ne plus avancer seule.</p>
           <div class="hero-meta">
-            <span class="live"><i aria-hidden="true"></i><b data-membres>47</b> membres</span>
+            <span class="live"><i aria-hidden="true"></i><b data-membres>50</b> membres</span>
             <span class="offer">Inscription offerte jusqu'au 31 décembre 2026</span>
           </div>
           <div class="btn-row">
@@ -149,7 +149,7 @@
     <div class="wrap">
       <div class="genie">
         <div class="stack">
-          <span class="label">Le parcours IMMOLLIA · réservé aux membres</span>
+          <span class="label">Le parcours IMMOLLIA · ouverture très bientôt</span>
           <h2 id="genie-title">Zone de <span>Génie</span></h2>
           <p style="color:var(--dark-soft)">Quatre semaines pour identifier ce que vous faites naturellement bien, l'assumer et en faire votre signature.</p>
         </div>
@@ -336,7 +336,6 @@
         </div>
       </div>
       <form id="contact-form" novalidate>
-        <div class="form-status" role="status">Formulaire en prévisualisation : il n'envoie rien pour l'instant.</div>
         <div class="field">
           <span style="display:block;font:700 0.9rem var(--font-display)">Je souhaite</span>
           <div class="choices">
@@ -348,12 +347,22 @@
         </div>
         <div class="field-row">
           <div class="field">
-            <label for="f-nom">Nom et prénom</label>
-            <input id="f-nom" name="nom" type="text" autocomplete="name" required>
+            <label for="f-prenom">Prénom</label>
+            <input id="f-prenom" name="prenom" type="text" autocomplete="given-name" required>
           </div>
           <div class="field">
+            <label for="f-nom">Nom</label>
+            <input id="f-nom" name="nom" type="text" autocomplete="family-name" required>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
             <label for="f-email">E-mail</label>
-            <input id="f-email" name="email" type="email" autocomplete="email" required>
+            <input id="f-email" name="email" type="email" autocomplete="email" inputmode="email" required>
+          </div>
+          <div class="field">
+            <label for="f-tel">Téléphone mobile</label>
+            <input id="f-tel" name="tel" type="tel" autocomplete="tel" inputmode="tel" placeholder="06 12 34 56 78" required>
           </div>
         </div>
         <div class="field-row">
@@ -377,8 +386,9 @@
         </div>
         <div class="field">
           <label for="f-message">Message</label>
-          <textarea id="f-message" name="message" required></textarea>
+          <textarea id="f-message" name="message"></textarea>
         </div>
+        <div class="hp" aria-hidden="true" style="position:absolute;left:-9999px"><label for="f-site">Ne pas remplir</label><input id="f-site" name="site" type="text" tabindex="-1" autocomplete="off"></div>
         <p class="hint">Vos informations servent uniquement à vous répondre et à vous accueillir dans la communauté.</p>
         <div id="form-result" class="form-status" role="alert" hidden></div>
         <button type="submit" class="btn btn--primary">Envoyer ma demande <span class="arrow" aria-hidden="true">→</span></button>

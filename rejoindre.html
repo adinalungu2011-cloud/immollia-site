@@ -74,7 +74,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 <main class="join">
   <div class="join-top">
     <a href="index.html" aria-label="IMMOLLIA, accueil du site"><img src="assets/logo-immollia.png" alt="IMMOLLIA" width="136" height="44"></a>
-    <span class="live"><i aria-hidden="true"></i><b id="nb-membres">47</b> membres</span>
+    <span class="live"><i aria-hidden="true"></i><b id="nb-membres">50</b> membres</span>
   </div>
 
   <section id="etape-form" class="stack" style="gap:1.1rem">
@@ -168,7 +168,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
   function montrerErreur(t, champ) { err.textContent = t; err.hidden = false; if (champ) champ.focus(); }
 
-  // Compteur de membres : valeur réelle lue sur le serveur (47 reste affiché si le réseau ne répond pas)
+  // Compteur de membres : valeur réelle lue sur le serveur (50 reste affiché si le réseau ne répond pas)
   var nb = document.getElementById('nb-membres');
   function afficherMembres(n) {
     n = parseInt(n, 10); if (!n) return;

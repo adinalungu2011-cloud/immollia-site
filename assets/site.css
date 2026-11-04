@@ -447,3 +447,8 @@ footer a:hover { color: var(--accent); }
 .profil-nav a { font: 700 0.9rem var(--font-display); color: var(--ink-soft); text-decoration: none; }
 .profil-nav a:hover { color: var(--accent); }
 @media (max-width: 760px) { .profil-body { grid-template-columns: 1fr; } .profil-head { flex-direction: column; text-align: center; } .profil-head img, .profil-head .avatar { width: 150px; height: 150px; } .profil-meta { justify-content: center; } }
+
+/* Formulaire de l'accueil : message après envoi */
+.form-done { display: flex; flex-direction: column; gap: 0.9rem; align-items: flex-start; padding: 1.5rem 0; }
+.form-done h3 { font: 800 1.6rem var(--font-display); color: var(--ink); }
+.form-done p { color: var(--ink-soft); }

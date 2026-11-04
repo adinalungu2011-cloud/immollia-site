@@ -36,7 +36,9 @@ $tel      = $champ('tel', 30);
 $activite = $champ('activite', 80);
 $source   = preg_replace('/[^a-z0-9_-]/i', '', $champ('source', 30)) ?: 'site';
 $news     = !empty($in['news']) ? 'oui' : 'non';
-$quand    = $champ('quand', 40); // horodatage de l'appareil (inscriptions enregistrées hors connexion)
+$quand    = $champ('quand', 40);
+$ville    = $champ('ville', 80);       // formulaire de l'accueil uniquement
+$message  = $champ('message', 1000); // horodatage de l'appareil (inscriptions enregistrées hors connexion)
 
 $chiffres = preg_replace('/\D+/', '', $tel);
 if ($prenom === '' || $nom === '')                    reponse(false, 'Merci d\'indiquer votre prénom et votre nom.', 422);
@@ -54,9 +56,9 @@ if (!$fh) reponse(false, 'Enregistrement impossible pour le moment. Réessayez d
 flock($fh, LOCK_EX);
 if ($nouveau) {
     fwrite($fh, "\xEF\xBB\xBF"); // BOM : accents corrects à l'ouverture dans Excel
-    fputcsv($fh, ['Date', 'Prénom', 'Nom', 'E-mail', 'Téléphone', 'Activité', 'Source', 'Accepte les actualités', 'Saisie sur l\'appareil'], ';');
+    fputcsv($fh, ['Date', 'Prénom', 'Nom', 'E-mail', 'Téléphone', 'Activité', 'Source', 'Accepte les actualités', 'Saisie sur l\'appareil'], ';', '"', '\\');
 }
-fputcsv($fh, [date('Y-m-d H:i:s'), $prenom, $nom, $email, $tel, $activite, $source, $news, $quand], ';');
+fputcsv($fh, [date('Y-m-d H:i:s'), $prenom, $nom, $email, $tel, $activite, $source, $news, $quand], ';', '"', '\\');
 flock($fh, LOCK_UN);
 fclose($fh);
 
@@ -73,6 +75,8 @@ $corps = "Nouvelle inscription depuis le site IMMOLLIA.\n\n"
        . "Activité : " . ($activite ?: '-') . "\nSource : $source\n"
        . "Accepte les actualités : $news\n"
        . ($quand ? "Saisie sur l'appareil le : $quand\n" : '')
+       . ($ville ? "Ville : $ville\n" : '')
+       . ($message ? "Message : $message\n" : '')
        . "\nÀ faire : l'ajouter à la communauté WhatsApp et lui envoyer le message de bienvenue.\n"
        . "\nToutes les inscriptions dans un fichier Excel (lien privé, ne pas le transférer) :\n$lienFichier\n";
 $entetes = "From: IMMOLLIA <contact@immollia.fr>\r\n"
