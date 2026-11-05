@@ -151,6 +151,10 @@ table.audit td.np{color:#A8A4AD;font-style:italic;background:#FAF9FB}
 .tabs button{flex:1;border:1.5px solid var(--line);background:#fff;padding:9px;border-radius:12px;font-weight:700;cursor:pointer;color:var(--muted)}
 .tabs button.on{background:var(--magenta);color:#fff;border-color:transparent}
 .err{color:#B00020;font-size:.85rem;min-height:18px;margin-top:8px}
+.mdp{position:relative}.mdp input{padding-right:92px}
+.mdp button{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--acc,#B31B64);font:inherit;font-size:.82rem;font-weight:700;cursor:pointer;padding:6px 8px}
+.lien{background:none;border:0;padding:0;color:var(--acc,#B31B64);font:inherit;font-size:.85rem;font-weight:600;cursor:pointer;text-decoration:underline}
+.ok-msg{color:#1b7a43;font-size:.9rem;margin-top:8px}
 
 /* ── Impression ── */
 @media print{
@@ -326,6 +330,8 @@ const Demo = {
     if(a==='register'){ const u={id:1,email:b.email,prenom:b.prenom||'Moi',nom:b.nom||'',agence:b.agence||'',admin:false}; this.s('user',u); return {ok:true,token:'demo',user:u}; }
     if(a==='login'){ if(!me) throw new Error("Aucun compte dans ce navigateur : crée-le dans l'onglet « Créer mon accès »."); return {ok:true,token:'demo',user:me}; }
     if(a==='logout') return {ok:true};
+    if(a==='oubli') return {ok:true};
+    if(a==='reinit') throw new Error('Mode démo : la réinitialisation fonctionne seulement sur le vrai site.');
     if(!me) throw new Error('Connexion requise.');
     if(a==='me') return {ok:true,user:me};
     if(a==='profil'){ Object.assign(me,{prenom:b.prenom??me.prenom,nom:b.nom??me.nom,agence:b.agence??me.agence}); if('photo' in b) me.photo=b.photo||null; this.s('user',me); return {ok:true}; }
@@ -414,6 +420,20 @@ function vueAuth(){
         <label class="lbl">Mot de passe</label><input type="password" name="password" required autocomplete="current-password">
         <div class="err" id="err-login"></div>
         <button class="btn" style="width:100%;margin-top:6px">Entrer dans mon parcours</button>
+        <p style="text-align:center;margin:12px 0 0"><button type="button" class="lien" id="vers-oubli">Mot de passe oublié ?</button></p>
+      </form>
+      <form id="f-oubli" class="hidden">
+        <p class="muted small" style="margin:0 0 4px">Indique l'e-mail de ton compte : tu recevras un lien pour choisir un nouveau mot de passe (valable 1 heure).</p>
+        <label class="lbl">E-mail</label><input type="email" name="email" required autocomplete="email">
+        <div class="err" id="err-oubli"></div><div class="ok-msg" id="ok-oubli"></div>
+        <button class="btn" style="width:100%;margin-top:6px">Recevoir le lien</button>
+        <p style="text-align:center;margin:12px 0 0"><button type="button" class="lien" id="retour-login">← Retour à la connexion</button></p>
+      </form>
+      <form id="f-reinit" class="hidden">
+        <p class="muted small" style="margin:0 0 4px">Choisis ton nouveau mot de passe.</p>
+        <label class="lbl">Nouveau mot de passe <span class="muted small">(8 caractères minimum)</span></label><input type="password" name="password" required minlength="8" autocomplete="new-password">
+        <div class="err" id="err-reinit"></div>
+        <button class="btn" style="width:100%;margin-top:6px">Enregistrer et entrer</button>
       </form>
       <form id="f-register" class="hidden">
         <div class="grid g2" style="gap:0 12px">
@@ -431,8 +451,30 @@ function vueAuth(){
     <p class="muted small" style="text-align:center;margin-top:14px">Réservé aux adhérentes de la communauté Immollia.</p>
   </div>`;
 }
+// Bouton « Afficher » dans chaque champ mot de passe
+function oeil(){
+  document.querySelectorAll('input[type=password]').forEach(i=>{
+    if(i.parentElement.classList.contains('mdp')) return;
+    const w=document.createElement('div'); w.className='mdp'; i.replaceWith(w); w.appendChild(i);
+    const b=document.createElement('button'); b.type='button'; b.textContent='Afficher'; b.setAttribute('aria-label','Afficher le mot de passe');
+    b.onclick=()=>{ const v=i.type==='password'; i.type=v?'text':'password'; b.textContent=v?'Masquer':'Afficher'; b.setAttribute('aria-label',v?'Masquer le mot de passe':'Afficher le mot de passe'); i.focus(); };
+    w.appendChild(b);
+  });
+}
 function bindAuth(){
-  document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b)); $('#f-login').classList.toggle('hidden',b.dataset.t!=='login'); $('#f-register').classList.toggle('hidden',b.dataset.t!=='register'); });
+  oeil();
+  const montrer=id=>{ for(const f of ['login','register','oubli','reinit']) $('#f-'+f).classList.toggle('hidden',f!==id); document.querySelector('.tabs').classList.toggle('hidden',id==='oubli'||id==='reinit'); };
+  document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b)); montrer(b.dataset.t); });
+  $('#vers-oubli').onclick=()=>montrer('oubli');
+  $('#retour-login').onclick=()=>montrer('login');
+  $('#f-oubli').onsubmit=async e=>{ e.preventDefault(); $('#err-oubli').textContent=''; $('#ok-oubli').textContent='';
+    try{ await Store.call('oubli',Object.fromEntries(new FormData(e.target))); $('#ok-oubli').textContent="C'est envoyé. Si un compte existe avec cette adresse, tu vas recevoir un e-mail dans quelques minutes (pense à regarder dans les indésirables)."; }
+    catch(err){ $('#err-oubli').textContent=err.message; } };
+  const reinit=(location.hash.match(/^#reinit=([0-9a-f]{64})$/)||[])[1];
+  if(reinit) montrer('reinit');
+  $('#f-reinit').onsubmit=async e=>{ e.preventDefault(); $('#err-reinit').textContent='';
+    try{ const j=await Store.call('reinit',{token:reinit,password:new FormData(e.target).get('password')}); Store.setToken(j.token); S.user=j.user; await charger(); go('accueil'); }
+    catch(err){ $('#err-reinit').textContent=err.message; } };
   for(const t of ['login','register']){
     $('#f-'+t).onsubmit = async e=>{ e.preventDefault(); const d=Object.fromEntries(new FormData(e.target)); $('#err-'+t).textContent='';
       try{ const j=await Store.call(t,d); Store.setToken(j.token); S.user=j.user; await charger(); go('accueil'); }
@@ -665,6 +707,7 @@ function bind(p){
     document.querySelectorAll('textarea[data-note]').forEach(t=>{ let tm; t.oninput=()=>{ clearTimeout(tm); const s=document.querySelector(`.saved[data-nk="${t.dataset.note}"]`); s.textContent='…'; tm=setTimeout(async()=>{ try{ await Store.call('note',{group_id:S.groupe.groupe.id,cible:+t.dataset.note,semaine:S.gsem,texte:t.value}); s.textContent='✓ enregistré'; const i=S.groupe.notes.findIndex(x=>x.auteur===S.user.id&&x.cible===+t.dataset.note&&x.semaine===S.gsem); const n={auteur:S.user.id,cible:+t.dataset.note,semaine:S.gsem,texte:t.value}; if(i>=0) S.groupe.notes[i]=n; else S.groupe.notes.push(n); }catch(e){ toast('⚠ '+e.message,4000); } },700); }; });
   }
   if(p==='profil'){
+    oeil();
     $('#f-profil').onsubmit=async e=>{ e.preventDefault(); const d=Object.fromEntries(new FormData(e.target)); if(!d.password) delete d.password; try{ await Store.call('profil',d); Object.assign(S.user,{prenom:d.prenom,nom:d.nom,agence:d.agence}); toast('Profil enregistré'); render(); }catch(err){ $('#err-profil').textContent=err.message; } };
     $('#photo-pick').onclick=()=>$('#photo-file').click();
     $('#photo-file').onchange=async e=>{ const f=e.target.files[0]; if(!f) return; try{ const data=await redimensionner(f,320); await Store.call('profil',{photo:data}); S.user.photo=data; toast('Photo enregistrée'); render(); }catch(err){ toast('⚠ '+err.message,4000); } };
@@ -687,6 +730,8 @@ function redimensionner(file, taille){
 (async function(){
   await Store.detect();
   if(Store.mode==='demo' && localStorage.getItem('zg_demo_user')) Store.setToken('demo');
+  // Lien « mot de passe oublié » : on affiche toujours l'écran de connexion pour choisir le nouveau mot de passe
+  if(/^#reinit=/.test(location.hash)) Store.setToken('');
   if(Store.token){ try{ const j=await Store.call('me'); S.user=j.user; await charger(); }catch(e){ Store.setToken(''); } }
   const h=location.hash.slice(1); if(S.user && h) S.page=h;
   render();

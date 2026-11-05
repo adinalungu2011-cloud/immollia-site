@@ -18,7 +18,7 @@
 // c'est le cas sur immollia.fr), sinon MariaDB/MySQL avec ZG_DB_HOST/NAME/USER/PASS.
 //
 // Appels : POST zg-api.php?action=…  (JSON)  — jeton « Authorization: Bearer … »
-// v1 — 2026-10-16 · v1.2 — 2026-10-27 : SQLite
+// v1 — 2026-10-16 · v1.2 — 2026-10-27 : SQLite · v1.3 — 2026-11-05 : mot de passe oublié
 // ═══════════════════════════════════════════════════════════════════════════
 
 if (!is_file(__DIR__ . '/config.php')) {
@@ -34,7 +34,7 @@ header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
 
-const ZG_VERSION    = 'v1.2';
+const ZG_VERSION    = 'v1.3';
 const ZG_SESSION_J  = 60;        // durée d'une session (jours)
 const ZG_MAX_CHAMP  = 20000;     // taille max d'une réponse (caractères)
 
@@ -148,6 +148,12 @@ function installer(PDO $pdo): void {
         updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         UNIQUE KEY u (group_id, auteur_id, cible_id, semaine)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    // Mot de passe oublié : jeton à usage unique (on ne garde que son empreinte), valable 1 heure.
+    $pdo->exec("CREATE TABLE IF NOT EXISTS zg_resets (
+        token_hash CHAR(64) PRIMARY KEY,
+        user_id INT NOT NULL,
+        expires_at DATETIME NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 }
 // Mêmes tables qu'en MySQL, en syntaxe SQLite (les dates sont écrites en heure de Paris).
 function installer_sqlite(PDO $pdo): void {
@@ -199,6 +205,7 @@ function installer_sqlite(PDO $pdo): void {
         updated_at TEXT NOT NULL $now,
         UNIQUE (group_id, auteur_id, cible_id, semaine)
     )");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS zg_resets (token_hash TEXT PRIMARY KEY, user_id INTEGER NOT NULL, expires_at TEXT NOT NULL)");
 }
 function est_admin(string $email): bool {
     $l = array_filter(array_map('trim', explode(',', strtolower(defined('ZG_ADMINS') ? ZG_ADMINS : ''))));
@@ -272,6 +279,46 @@ if ($action === 'login') {
     $u = $s->fetch();
     if (!$u || !password_verify($pass, $u['password_hash'])) { sleep(1); erreur('E-mail ou mot de passe incorrect.', 401); }
     if (!(int)$u['actif']) erreur('Compte désactivé.', 403);
+    rep(200, ['ok' => true, 'token' => ouvrir_session((int)$u['id']), 'user' => profil_public($u) + ['admin' => est_admin($u['email'])]]);
+}
+
+// Mot de passe oublié : envoie un lien valable 1 heure. Réponse identique que le compte existe ou non.
+if ($action === 'oubli') {
+    $email = strtolower(trim((string)($body['email'] ?? '')));
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) erreur('Adresse e-mail invalide.');
+    $db = db();
+    $s = $db->prepare('SELECT id, prenom FROM zg_users WHERE email = ? AND actif = 1'); $s->execute([$email]);
+    if ($u = $s->fetch()) {
+        $t = bin2hex(random_bytes(32));
+        $db->prepare('DELETE FROM zg_resets WHERE user_id = ? OR expires_at < ?')->execute([$u['id'], maintenant()]);
+        $db->prepare('INSERT INTO zg_resets (token_hash, user_id, expires_at) VALUES (?, ?, ?)')
+           ->execute([hash('sha256', $t), $u['id'], date('Y-m-d H:i:s', time() + 3600)]);
+        $base = 'https://' . preg_replace('/[^a-z0-9.\-]/i', '', $_SERVER['HTTP_HOST'] ?? 'www.immollia.fr')
+              . rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/parcours/zg-api.php'), '/') . '/';
+        $corps = "Bonjour " . $u['prenom'] . ",\n\n"
+               . "Pour choisir un nouveau mot de passe pour ton parcours Zone de Génie, clique sur ce lien (valable 1 heure) :\n\n"
+               . $base . '#reinit=' . $t . "\n\n"
+               . "Si tu n'as rien demandé, ignore simplement ce message : ton mot de passe ne change pas.\n\n"
+               . "L'équipe IMMOLLIA\n";
+        $entetes = "From: IMMOLLIA <contact@immollia.fr>\r\nMIME-Version: 1.0\r\n"
+                 . "Content-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: 8bit\r\n";
+        @mail($email, mb_encode_mimeheader('Zone de Génie : nouveau mot de passe', 'UTF-8'), $corps, $entetes);
+    }
+    rep(200, ['ok' => true]);
+}
+
+if ($action === 'reinit') {
+    $t    = (string)($body['token'] ?? '');
+    $pass = (string)($body['password'] ?? '');
+    if (strlen($pass) < 8) erreur('Mot de passe : 8 caractères minimum.');
+    $db = db();
+    $s = $db->prepare('SELECT u.* FROM zg_resets r JOIN zg_users u ON u.id = r.user_id WHERE r.token_hash = ? AND r.expires_at > ?');
+    $s->execute([hash('sha256', $t), maintenant()]);
+    $u = $s->fetch();
+    if (!$u) erreur('Ce lien a expiré ou a déjà servi. Redemande un nouveau lien.', 400);
+    $db->prepare('UPDATE zg_users SET password_hash = ? WHERE id = ?')->execute([password_hash($pass, PASSWORD_DEFAULT), $u['id']]);
+    $db->prepare('DELETE FROM zg_resets WHERE user_id = ?')->execute([$u['id']]);
+    $db->prepare('DELETE FROM zg_sessions WHERE user_id = ?')->execute([$u['id']]);
     rep(200, ['ok' => true, 'token' => ouvrir_session((int)$u['id']), 'user' => profil_public($u) + ['admin' => est_admin($u['email'])]]);
 }
 
