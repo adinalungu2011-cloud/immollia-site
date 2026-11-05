@@ -29,7 +29,8 @@ trinômes en option.
 - **Mot de passe** : bouton « Afficher » dans les champs, et « Mot de passe oublié ? » qui envoie un lien
   valable 1 heure (table `zg_resets`, on ne garde que l'empreinte du jeton).
 - **Animatrices** (adresses listées dans `ZG_ADMINS`) : voient tous les groupes et peuvent écrire des notes partout ;
-  l'action `admin_adherentes` liste toutes les adhérentes et leur avancement.
+  l'onglet **Animatrices** (action `admin_adherentes`) liste toutes les inscrites, leur avancement et leur groupe
+  (calculé sur les noms des champs remplis : le contenu des réponses reste privé).
 - **Mode démo** : si `zg-api.php` ne répond pas (par ex. ouverture du fichier sans serveur), l'application
   bascule sur le stockage du navigateur avec un binôme fictif « Camille » pour illustrer la vue groupe.
 
@@ -67,7 +68,7 @@ autres parcours), chacun ajouté comme un onglet dans `index.html`.
 ## Idées pour la suite (non faites)
 
 - Rappel automatique par e-mail la veille de la visio du groupe (cron cPanel + `mail()`).
-- Tableau de bord animatrice dans l'interface (l'API `admin_adherentes` existe déjà).
+
 - Plusieurs « promotions » (sessions datées du 15/09 au 15/10, etc.) avec un calendrier commun.
 - Export CSV des verbatims de semaine 4 pour nourrir la proposition de valeur.
 

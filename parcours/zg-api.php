@@ -499,10 +499,29 @@ if ($action === 'note') {
 // Animatrice : liste de toutes les adhérentes et leur avancement.
 if ($action === 'admin_adherentes') {
     if (!$me['admin']) erreur('Réservé aux animatrices.', 403);
-    $s = $db->query('SELECT u.id, u.prenom, u.nom, u.agence, u.email, u.created_at, u.last_login,
-                       (SELECT COUNT(*) FROM zg_entries e WHERE e.user_id = u.id AND e.cle LIKE \'s%\' AND e.valeur <> \'\') AS champs
-                     FROM zg_users u ORDER BY u.created_at DESC');
-    rep(200, ['ok' => true, 'adherentes' => $s->fetchAll()]);
+    // Pour chaque adhérente : avancement (noms des champs remplis, jamais leur contenu), semaines validées, groupes.
+    $cles = [];
+    foreach ($db->query("SELECT user_id, cle, valeur FROM zg_entries WHERE valeur <> ''") as $r) {
+        $uid = (int)$r['user_id'];
+        if (preg_match('/^fait_s([1-4])$/', $r['cle'], $m)) { if ($r['valeur'] === '1') $cles[$uid]['faites'][] = (int)$m[1]; continue; }
+        if ($r['cle'] === 's1_competences') { $c = json_decode($r['valeur'], true); $cles[$uid]['competences'] = is_array($c) ? count($c) : 0; continue; }
+        if (preg_match('/^s[1-4]_/', $r['cle'])) $cles[$uid]['cles'][] = $r['cle'];
+    }
+    $grp = [];
+    foreach ($db->query('SELECT m.user_id, g.id, g.nom, g.code FROM zg_group_members m JOIN zg_groups g ON g.id = m.group_id') as $r) {
+        $grp[(int)$r['user_id']][] = ['id' => (int)$r['id'], 'nom' => $r['nom'], 'code' => $r['code']];
+    }
+    $out = [];
+    foreach ($db->query('SELECT id, prenom, nom, agence, email, created_at, last_login FROM zg_users ORDER BY created_at DESC') as $u) {
+        $uid = (int)$u['id'];
+        $faites = $cles[$uid]['faites'] ?? []; sort($faites);
+        $out[] = profil_public($u) + [
+            'created_at' => $u['created_at'], 'last_login' => $u['last_login'], 'admin' => est_admin($u['email']),
+            'cles' => $cles[$uid]['cles'] ?? [], 'competences' => $cles[$uid]['competences'] ?? 0,
+            'faites' => $faites, 'groupes' => $grp[$uid] ?? [],
+        ];
+    }
+    rep(200, ['ok' => true, 'adherentes' => $out]);
 }
 
 erreur('Action inconnue.', 404);

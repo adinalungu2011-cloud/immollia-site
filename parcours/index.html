@@ -71,6 +71,19 @@ textarea{min-height:110px;resize:vertical;line-height:1.5}
 .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.75rem;font-weight:700;background:#fff;color:var(--violet);border:1px solid var(--line)}
 .pill.ok{background:#E8F5E9;color:var(--ok)}
 .pill.mag{background:var(--magenta);color:#fff;border-color:transparent}
+.anim-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
+.anim-stats div{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.anim-stats b{display:block;font-size:1.5rem}
+.anim-list{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.anim-row{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1.2fr) 190px;gap:14px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.anim-row .who{display:flex;gap:10px;align-items:center;min-width:0}
+.anim-row .who div{min-width:0}
+.anim-row .who div>b,.anim-row .who div>span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.anim-row .bar{margin-top:6px}
+.sems{display:flex;gap:4px;margin-top:6px}
+.sems span{font-size:.7rem;font-weight:700;padding:2px 7px;border-radius:999px;background:#F5F4F6;color:var(--muted)}
+.sems span.ok{background:#E8F5E9;color:var(--ok)}
+@media(max-width:760px){.anim-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.anim-row{grid-template-columns:1fr}}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#141414;color:#fff;padding:10px 18px;border-radius:999px;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .25s;z-index:50}
 .toast.show{opacity:1}
 .banner{background:#FFF4E5;border:1px solid #FFD8A8;color:#7A4A00;padding:10px 14px;border-radius:12px;font-size:.85rem;margin-bottom:16px}
@@ -184,6 +197,7 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:30px 16px}
       <button data-p="roue">La roue</button>
       <button data-p="groupe">Mon binôme</button>
       <button data-p="guide">Guide visio</button>
+      <button data-p="animatrices" class="hidden">Animatrices</button>
       <button data-p="profil">Profil</button>
     </nav>
   </div>
@@ -389,6 +403,7 @@ function render(){
   if(!S.user){ $('#nav').classList.add('hidden'); m.innerHTML = vueAuth(); bindAuth(); return; }
   $('#nav').classList.remove('hidden');
   document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on', b.dataset.p===S.page));
+  document.querySelector('#nav button[data-p=animatrices]').classList.toggle('hidden', !S.user.admin);
   const pb=document.querySelector('#nav button[data-p=profil]'); pb.innerHTML=`<span class="row" style="gap:6px">${avatar(S.user).replace('class="avatar','style="width:22px;height:22px;font-size:.65rem" class="avatar')}Profil</span>`;
   const demo = Store.mode==='demo' ? `<div class="banner">🧪 <b>Mode démo</b> : aucun serveur détecté, tes réponses sont stockées uniquement dans ce navigateur. Une fois l'application installée sur immollia.fr, elles seront enregistrées sur ton compte.</div>` : '';
   const p = S.page;
@@ -400,6 +415,7 @@ function render(){
   else if(p==='guide') h += vueGuide();
   else if(p==='profil') h += vueProfil();
   else if(p==='impression') h += vueImpression();
+  else if(p==='animatrices' && S.user.admin) h += vueAnimatrices();
   else h += vueAccueil();
   m.innerHTML = h;
   bind(p);
@@ -646,7 +662,43 @@ function vueGroupe(){
     </div>
   </div>`;
 }
-async function chargerGroupe(){ if(!S.groupes.length){ S.groupe=null; return; } try{ S.groupe = await Store.call('groupe',{id:S.groupes[0].id}); }catch(e){ toast(e.message,4000); S.groupe=null; } }
+async function chargerGroupe(){ if(!S.groupes.length){ S.groupe=null; return; } try{ S.groupe = await Store.call('groupe',{id:S.groupeId||S.groupes[0].id}); }catch(e){ toast(e.message,4000); S.groupe=null; } }
+
+// ── Espace animatrices ────────────────────────────────────────────────────
+// Avancement de chaque adhérente : calculé sur les noms des champs remplis (le contenu reste privé).
+function pctDe(a){
+  let t=0,o=0;
+  for(let n=1;n<=4;n++){ const w=SEMAINES[n-1]; const ks=w.parties.flatMap(p=>[...p.champs.map(c=>c.k),...(p.extra||[]).map(c=>c.k)]).filter(k=>!k.startsWith('__'));
+    t+=ks.length+(n===1?1:0); o+=ks.filter(k=>a.cles.includes(k)).length+(n===1&&a.competences===5?1:0); }
+  return Math.round(100*o/Math.max(1,t));
+}
+function dateFr(d){ if(!d) return 'jamais'; const x=new Date(d.replace(' ','T')); return isNaN(x)?d:x.toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}); }
+function vueAnimatrices(){
+  if(!S.anim) return `<div class="card"><h1>Espace <span class="acc">animatrices.</span></h1><p class="muted">Chargement…</p></div>`;
+  const q=(S.animQ||'').toLowerCase();
+  const liste=S.anim.filter(a=>!q || [a.prenom,a.nom,a.agence,a.email].join(' ').toLowerCase().includes(q));
+  const il7=Date.now()-7*864e5;
+  const actives=S.anim.filter(a=>a.last_login && new Date(a.last_login.replace(' ','T')).getTime()>il7).length;
+  const enGroupe=S.anim.filter(a=>a.groupes.length).length;
+  const fini=S.anim.filter(a=>a.faites.length===4).length;
+  return `<div class="card"><h1>Espace <span class="acc">animatrices.</span></h1>
+    <p class="muted">Toutes les inscrites au parcours et leur avancement. Les réponses restent privées : dans un groupe, vous voyez seulement ce que chacune a choisi de partager.</p>
+    <div class="anim-stats">
+      <div><b>${S.anim.length}</b><span class="small muted">inscrites</span></div>
+      <div><b>${actives}</b><span class="small muted">connectées ces 7 jours</span></div>
+      <div><b>${enGroupe}</b><span class="small muted">en binôme ou trinôme</span></div>
+      <div><b>${fini}</b><span class="small muted">parcours terminés</span></div>
+    </div>
+    <input type="text" id="anim-q" placeholder="Rechercher un nom, une agence, un e-mail…" value="${esc(S.animQ||'')}">
+    <div class="anim-list">${liste.map(a=>{ const pc=pctDe(a); return `<div class="anim-row">
+      <div class="who">${avatar(a)}<div><b>${esc(a.prenom)} ${esc(a.nom)}${a.admin?' <span class="pill">animatrice</span>':''}</b><span class="small muted">${esc(a.agence||'—')} · ${esc(a.email)}</span></div></div>
+      <div class="small muted">Inscrite le ${dateFr(a.created_at)}<br>Dernière visite : ${dateFr(a.last_login)}</div>
+      <div><span class="small"><b>${pc} %</b> rempli · ${a.competences}/5 compétences</span><div class="bar"><i style="width:${pc}%"></i></div>
+        <div class="sems">${[1,2,3,4].map(n=>`<span class="${a.faites.includes(n)?'ok':''}">S${n}${a.faites.includes(n)?' ✓':''}</span>`).join('')}</div></div>
+      <div>${a.groupes.length?a.groupes.map(g=>`<button class="btn sec" style="padding:7px 12px;font-size:.8rem" data-grp="${g.id}">${esc(g.nom||'Groupe '+g.code)}</button>`).join(' '):'<span class="small muted">Seule</span>'}</div>
+    </div>`; }).join('') || '<p class="muted">Aucune inscrite pour le moment.</p>'}</div></div>`;
+}
+async function chargerAnim(){ try{ S.anim=(await Store.call('admin_adherentes')).adherentes||[]; }catch(e){ toast(e.message,4000); S.anim=[]; } }
 
 // ── Guide visio ────────────────────────────────────────────────────────────
 function vueGuide(){
@@ -706,6 +758,10 @@ function bind(p){
     document.querySelectorAll('[data-gsem]').forEach(b=>b.onclick=()=>{ S.gsem=+b.dataset.gsem; render(); });
     document.querySelectorAll('textarea[data-note]').forEach(t=>{ let tm; t.oninput=()=>{ clearTimeout(tm); const s=document.querySelector(`.saved[data-nk="${t.dataset.note}"]`); s.textContent='…'; tm=setTimeout(async()=>{ try{ await Store.call('note',{group_id:S.groupe.groupe.id,cible:+t.dataset.note,semaine:S.gsem,texte:t.value}); s.textContent='✓ enregistré'; const i=S.groupe.notes.findIndex(x=>x.auteur===S.user.id&&x.cible===+t.dataset.note&&x.semaine===S.gsem); const n={auteur:S.user.id,cible:+t.dataset.note,semaine:S.gsem,texte:t.value}; if(i>=0) S.groupe.notes[i]=n; else S.groupe.notes.push(n); }catch(e){ toast('⚠ '+e.message,4000); } },700); }; });
   }
+  if(p==='animatrices'){
+    const qi=$('#anim-q'); if(qi) qi.oninput=()=>{ S.animQ=qi.value; const pos=qi.selectionStart; render(); const n=$('#anim-q'); n.focus(); n.setSelectionRange(pos,pos); };
+    document.querySelectorAll('[data-grp]').forEach(b=>b.onclick=async()=>{ S.groupeId=+b.dataset.grp; S.groupe=null; await window.go('groupe'); });
+  }
   if(p==='profil'){
     oeil();
     $('#f-profil').onsubmit=async e=>{ e.preventDefault(); const d=Object.fromEntries(new FormData(e.target)); if(!d.password) delete d.password; try{ await Store.call('profil',d); Object.assign(S.user,{prenom:d.prenom,nom:d.nom,agence:d.agence}); toast('Profil enregistré'); render(); }catch(err){ $('#err-profil').textContent=err.message; } };
@@ -736,9 +792,10 @@ function redimensionner(file, taille){
   const h=location.hash.slice(1); if(S.user && h) S.page=h;
   render();
   if(S.user && S.page==='groupe'){ await chargerGroupe(); render(); }
+  if(S.user && S.user.admin && S.page==='animatrices'){ await chargerAnim(); render(); }
   // Quand on arrive sur l'onglet groupe, on recharge les données du groupe.
-  const _go = go; window.go = async p=>{ _go(p); if(p==='groupe' && S.groupes.length){ await chargerGroupe(); render(); } };
-  document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>window.go(b.dataset.p));
+  const _go = go; window.go = async p=>{ _go(p); if(p==='groupe' && S.groupes.length){ await chargerGroupe(); render(); } if(p==='animatrices' && S.user && S.user.admin){ await chargerAnim(); render(); } };
+  document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{ if(b.dataset.p==='groupe') S.groupeId=0; window.go(b.dataset.p); });
 })();
 </script>
 </body>
