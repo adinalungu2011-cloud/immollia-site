@@ -508,7 +508,7 @@ function bindAuth(){
     catch(err){ $('#err-reinit').textContent=err.message; } };
   for(const t of ['login','register']){
     $('#f-'+t).onsubmit = async e=>{ e.preventDefault(); const d=Object.fromEntries(new FormData(e.target)); $('#err-'+t).textContent='';
-      try{ const j=await Store.call(t,d); Store.setToken(j.token); S.user=j.user; await charger(); go(verrou()?'etapes':'accueil'); }
+      try{ const j=await Store.call(t,d); Store.setToken(j.token); S.user=j.user; await charger(); const voulu=location.hash.slice(1); await window.go(voulu && !voulu.startsWith('reinit') ? voulu : (verrou()?'etapes':'accueil')); }
       catch(err){ $('#err-'+t).textContent=err.message; } };
   }
 }

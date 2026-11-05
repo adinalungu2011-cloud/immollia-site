@@ -18,7 +18,7 @@
 // c'est le cas sur immollia.fr), sinon MariaDB/MySQL avec ZG_DB_HOST/NAME/USER/PASS.
 //
 // Appels : POST zg-api.php?action=…  (JSON)  — jeton « Authorization: Bearer … »
-// v1 — 2026-10-16 · v1.2 — 2026-10-27 : SQLite · v1.3 — 2026-11-05 : mot de passe oublié · v1.4 : « Mes 5 étapes », parcours débloqué par membre
+// v1 — 2026-10-16 · v1.2 — 2026-10-27 : SQLite · v1.3 — 2026-11-05 : mot de passe oublié · v1.4 : « Mes 5 étapes », parcours débloqué par membre · v1.5 : e-mails à l'équipe
 // ═══════════════════════════════════════════════════════════════════════════
 
 if (!is_file(__DIR__ . '/config.php')) {
@@ -34,7 +34,7 @@ header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
 
-const ZG_VERSION    = 'v1.4';
+const ZG_VERSION    = 'v1.5';
 const ZG_SESSION_J  = 60;        // durée d'une session (jours)
 const ZG_MAX_CHAMP  = 20000;     // taille max d'une réponse (caractères)
 
@@ -240,6 +240,21 @@ function profil_public(array $u): array {
 // Les 4 semaines et le binôme : réservés aux membres débloquées (et aux animatrices).
 function acces_complet(array $me): bool { return !empty($me['admin']) || !empty($me['debloque']); }
 const ZG_ETAPES = ['e1_flow', 'e1_miroir', 'e1_impact', 'e1_signature'];
+
+// ─── E-mails ──────────────────────────────────────────────────────────────
+// Destinataires des alertes « équipe » (nouvelle inscription, autodiagnostic à valider).
+// Copie à adina@ : o2switch garde chez lui les e-mails pour immollia.fr (la boîte contact@ est chez OVH).
+if (!defined('ZG_NOTIF')) define('ZG_NOTIF', 'contact@immollia.fr, adina@adinaimmobilier.fr');
+function url_parcours(): string {
+    return 'https://' . preg_replace('/[^a-z0-9.\-]/i', '', $_SERVER['HTTP_HOST'] ?? 'www.immollia.fr')
+         . rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/parcours/zg-api.php'), '/') . '/';
+}
+function envoyer_mail(string $a, string $sujet, string $corps, string $repondreA = ''): void {
+    $entetes = "From: IMMOLLIA <contact@immollia.fr>\r\n" . ($repondreA ? "Reply-To: $repondreA\r\n" : '')
+             . "MIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: 8bit\r\n";
+    @mail($a, mb_encode_mimeheader($sujet, 'UTF-8'), $corps, $entetes);
+}
+const ZG_COMPETENCES = ['amour' => 'Amour-propre', 'real' => 'Réalisation de soi', 'consc' => 'Conscience de soi émotionnelle', 'exprem' => 'Expression émotionnelle', 'affirm' => 'Affirmation de soi', 'indep' => 'Indépendance', 'relhum' => 'Relations humaines', 'empat' => 'Empathie', 'respso' => 'Responsabilité sociale', 'resol' => 'Résolution de problèmes', 'real2' => 'Sens de la réalité', 'impuls' => 'Contrôle des impulsions', 'flex' => 'Flexibilité', 'tolst' => 'Tolérance au stress', 'optim' => 'Optimisme'];
 function ouvrir_session(int $uid): string {
     $t = bin2hex(random_bytes(32));
     db()->prepare('INSERT INTO zg_sessions (token, user_id, expires_at) VALUES (?, ?, ?)')
@@ -280,6 +295,20 @@ if ($action === 'register') {
     $db->prepare('INSERT INTO zg_users (email, password_hash, prenom, nom, agence) VALUES (?,?,?,?,?)')
        ->execute([$email, password_hash($pass, PASSWORD_DEFAULT), mb_substr($prenom, 0, 80), mb_substr($nom, 0, 80), mb_substr($agence, 0, 120)]);
     $uid = (int)$db->lastInsertId();
+    envoyer_mail(ZG_NOTIF, 'Zone de Génie : nouvelle inscription de ' . $prenom . ' ' . $nom,
+        "Nouvelle inscription au parcours Zone de Génie.
+
+"
+        . "Prénom : $prenom
+Nom : " . ($nom ?: '-') . "
+Agence / activité : " . ($agence ?: '-') . "
+E-mail : $email
+
+"
+        . "Elle commence par l'autodiagnostic. Vous recevrez un e-mail quand elle l'enverra.
+"
+        . "Onglet Animatrices : " . url_parcours() . "#animatrices
+", $email);
     rep(200, ['ok' => true, 'token' => ouvrir_session($uid), 'user' => ['id' => $uid, 'email' => $email, 'prenom' => $prenom, 'nom' => $nom, 'agence' => $agence, 'debloque' => false, 'admin' => est_admin($email)]]);
 }
 
@@ -306,16 +335,13 @@ if ($action === 'oubli') {
         $db->prepare('DELETE FROM zg_resets WHERE user_id = ? OR expires_at < ?')->execute([$u['id'], maintenant()]);
         $db->prepare('INSERT INTO zg_resets (token_hash, user_id, expires_at) VALUES (?, ?, ?)')
            ->execute([hash('sha256', $t), $u['id'], date('Y-m-d H:i:s', time() + 3600)]);
-        $base = 'https://' . preg_replace('/[^a-z0-9.\-]/i', '', $_SERVER['HTTP_HOST'] ?? 'www.immollia.fr')
-              . rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/parcours/zg-api.php'), '/') . '/';
+        $base = url_parcours();
         $corps = "Bonjour " . $u['prenom'] . ",\n\n"
                . "Pour choisir un nouveau mot de passe pour ton parcours Zone de Génie, clique sur ce lien (valable 1 heure) :\n\n"
                . $base . '#reinit=' . $t . "\n\n"
                . "Si tu n'as rien demandé, ignore simplement ce message : ton mot de passe ne change pas.\n\n"
                . "L'équipe IMMOLLIA\n";
-        $entetes = "From: IMMOLLIA <contact@immollia.fr>\r\nMIME-Version: 1.0\r\n"
-                 . "Content-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: 8bit\r\n";
-        @mail($email, mb_encode_mimeheader('Zone de Génie : nouveau mot de passe', 'UTF-8'), $corps, $entetes);
+        envoyer_mail($email, 'Zone de Génie : nouveau mot de passe', $corps);
     }
     rep(200, ['ok' => true]);
 }
@@ -387,6 +413,12 @@ if ($action === 'carnet') {
 if ($action === 'sauver') {
     $entries = $body['entries'] ?? null;
     if (!is_array($entries) || !$entries) erreur('Rien à enregistrer.');
+    // Autodiagnostic envoyé pour la première fois → alerte à l'équipe (après l'enregistrement)
+    $alerte = false;
+    if (($entries['e1_envoye'] ?? '') === '1') {
+        $q = $db->prepare("SELECT valeur FROM zg_entries WHERE user_id = ? AND cle = 'e1_envoye'"); $q->execute([$me['id']]);
+        $alerte = $q->fetchColumn() !== '1';
+    }
     $st = $db->prepare(sql_upsert('zg_entries', ['user_id', 'cle', 'valeur', 'updated_at'], ['user_id', 'cle'], ['valeur', 'updated_at']));
     $n = 0;
     foreach ($entries as $k => $v) {
@@ -395,6 +427,19 @@ if ($action === 'sauver') {
         $v = is_string($v) ? $v : json_encode($v, JSON_UNESCAPED_UNICODE);
         if (mb_strlen($v) > ZG_MAX_CHAMP) $v = mb_substr($v, 0, ZG_MAX_CHAMP);
         $st->execute([$me['id'], $k, $v, maintenant()]); $n++;
+    }
+    if ($alerte) {
+        $q = $db->prepare('SELECT cle, valeur FROM zg_entries WHERE user_id = ?'); $q->execute([$me['id']]);
+        $e = [];
+        foreach ($q as $r) $e[$r['cle']] = $r['valeur'];
+        $comp = json_decode($e['s1_competences'] ?? '[]', true) ?: [];
+        $titres = ['e1_flow' => '1. Le Flow Naturel', 'e1_miroir' => '2. Le Miroir Extérieur', 'e1_impact' => "3. La Zone d'Impact"];
+        $corps = $me['prenom'] . ' ' . $me['nom'] . ' (' . ($me['agence'] ?: 'agence non indiquée') . ', ' . $me['email'] . ") a envoyé son autodiagnostic.\n\n";
+        foreach ($titres as $k => $t) $corps .= "$t\n" . trim($e[$k] ?? '') . "\n\n";
+        $corps .= "4. L'Intelligence Émotionnelle\n" . implode(', ', array_map(fn($id) => ZG_COMPETENCES[$id] ?? $id, $comp)) . "\n\n";
+        $corps .= "5. L'Alignement et la Vision\n" . trim($e['e1_signature'] ?? '') . "\n\n";
+        $corps .= "Pour débloquer son parcours complet : onglet Animatrices › « Lire l'autodiagnostic » › « Débloquer le parcours complet ».\n" . url_parcours() . "#animatrices\n";
+        envoyer_mail(ZG_NOTIF, 'Zone de Génie : autodiagnostic à valider (' . $me['prenom'] . ' ' . $me['nom'] . ')', $corps, $me['email']);
     }
     rep(200, ['ok' => true, 'n' => $n, 'updated_at' => date('Y-m-d H:i:s')]);
 }
