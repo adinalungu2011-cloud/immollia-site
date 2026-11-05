@@ -42,6 +42,14 @@ nav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
 nav button{border:0;background:transparent;padding:8px 12px;border-radius:999px;font-weight:600;color:var(--muted);cursor:pointer;font-size:.88rem}
 nav button:hover{background:#F5F4F6;color:#141414}
 nav button.on{background:var(--magenta);color:#fff}
+nav button.lock{opacity:.4;cursor:not-allowed}
+nav button.lock:hover{background:transparent;color:var(--muted)}
+.etape{border:1px solid var(--line);background:#fff;border-radius:18px;padding:18px 20px;margin-top:14px}
+.etape .num{font-size:.75rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--magenta)}
+.etape h3{margin:4px 0 0}
+.etape.ok{border-color:#bfe3c8}
+.anim-detail{grid-column:1/-1;border-top:1px solid var(--line);padding-top:12px;display:grid;gap:10px}
+.anim-detail b{display:block;font-size:.8rem;color:var(--magenta)}
 .user-chip{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--muted)}
 .avatar{width:30px;height:30px;border-radius:50%;background:var(--magenta);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.8rem;object-fit:cover;flex:none;overflow:hidden}
 .avatar.lg{width:96px;height:96px;font-size:2rem}
@@ -189,6 +197,7 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:30px 16px}
     <img class="logo" src="logo-immollia.webp" alt="Immollia">
     <div class="tagline">Excellence <b>•</b> Compétence <b>•</b> Professionnalisme</div>
     <nav id="nav" class="hidden">
+      <button data-p="etapes">Mes 5 étapes</button>
       <button data-p="accueil">Accueil</button>
       <button data-p="s1">Semaine 1</button>
       <button data-p="s2">Semaine 2</button>
@@ -374,6 +383,9 @@ const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>
 const toast = (m,ms=1800)=>{ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),ms); };
 const val = k => S.entries[k] || '';
 const avatar = (u,cls='') => u && u.photo ? `<img class="avatar ${cls}" src="${u.photo}" alt="">` : `<span class="avatar ${cls}">${esc(((u&&u.prenom)||'?')[0].toUpperCase())}</span>`;
+// Avant validation par une animatrice, la membre n'a accès qu'à « Mes 5 étapes » (+ la roue et son profil).
+const verrou = () => Store.mode==='api' && !!S.user && !S.user.admin && !S.user.debloque;
+const PAGES_LIBRES = ['etapes','roue','profil'];
 const comps = () => { try{ const a=JSON.parse(val('s1_competences')||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } };
 
 // Sauvegarde automatique (regroupée, 700 ms après la dernière frappe)
@@ -394,7 +406,7 @@ const faite = n => val('fait_s'+n)==='1';
 function progression(){ let t=0,o=0; for(let n=1;n<=4;n++){ const r=remplis(n); t+=r.total; o+=r.ok; } return Math.round(100*o/Math.max(1,t)); }
 
 // ── Navigation ─────────────────────────────────────────────────────────────
-function go(p){ S.page=p; location.hash=p; render(); window.scrollTo({top:0}); }
+function go(p){ if(verrou() && !PAGES_LIBRES.includes(p)) p='etapes'; S.page=p; location.hash=p; render(); window.scrollTo({top:0}); }
 document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.p));
 window.addEventListener('hashchange',()=>{ const p=location.hash.slice(1); if(p && p!==S.page && S.user){ S.page=p; render(); } });
 
@@ -404,11 +416,14 @@ function render(){
   $('#nav').classList.remove('hidden');
   document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on', b.dataset.p===S.page));
   document.querySelector('#nav button[data-p=animatrices]').classList.toggle('hidden', !S.user.admin);
+  if(verrou() && !PAGES_LIBRES.includes(S.page)) S.page='etapes';
+  document.querySelectorAll('#nav button').forEach(b=>{ const l=verrou() && !PAGES_LIBRES.includes(b.dataset.p) && b.dataset.p!=='animatrices'; b.classList.toggle('lock', l); b.title = l ? "S'ouvre après validation de tes 5 étapes par l'équipe IMMOLLIA" : ''; });
   const pb=document.querySelector('#nav button[data-p=profil]'); pb.innerHTML=`<span class="row" style="gap:6px">${avatar(S.user).replace('class="avatar','style="width:22px;height:22px;font-size:.65rem" class="avatar')}Profil</span>`;
   const demo = Store.mode==='demo' ? `<div class="banner">🧪 <b>Mode démo</b> : aucun serveur détecté, tes réponses sont stockées uniquement dans ce navigateur. Une fois l'application installée sur immollia.fr, elles seront enregistrées sur ton compte.</div>` : '';
   const p = S.page;
   let h = demo;
-  if(p==='accueil') h += vueAccueil();
+  if(p==='etapes') h += vueEtapes();
+  else if(p==='accueil') h += vueAccueil();
   else if(/^s[1-4]$/.test(p)) h += vueSemaine(+p[1]);
   else if(p==='roue') h += vueRoue();
   else if(p==='groupe') h += vueGroupe();
@@ -493,7 +508,7 @@ function bindAuth(){
     catch(err){ $('#err-reinit').textContent=err.message; } };
   for(const t of ['login','register']){
     $('#f-'+t).onsubmit = async e=>{ e.preventDefault(); const d=Object.fromEntries(new FormData(e.target)); $('#err-'+t).textContent='';
-      try{ const j=await Store.call(t,d); Store.setToken(j.token); S.user=j.user; await charger(); go('accueil'); }
+      try{ const j=await Store.call(t,d); Store.setToken(j.token); S.user=j.user; await charger(); go(verrou()?'etapes':'accueil'); }
       catch(err){ $('#err-'+t).textContent=err.message; } };
   }
 }
@@ -531,6 +546,37 @@ function vueAccueil(){
       <hr style="border:0;border-top:1px dashed var(--line);margin:16px 0">
       <button class="btn sec sm" data-go="impression">🖨 Imprimer / exporter mon carnet en PDF</button>
     </div>
+  </div>`;
+}
+
+// ── Mes 5 étapes (première interface, avant le parcours complet) ──────────
+const ETAPES = [
+  {k:'e1_flow', titre:'Le Flow Naturel', sous:'Les talents spontanés', q:"Dans votre quotidien, quelle tâche vous fait perdre la notion du temps tout en vous sentant parfaitement à votre place ?"},
+  {k:'e1_miroir', titre:'Le Miroir Extérieur', sous:'La reconnaissance des pairs', q:"Pour quel type de sujet ou de problématique vos collègues ou clients viennent-ils spontanément vous demander conseil ?"},
+  {k:'e1_impact', titre:"La Zone d'Impact", sous:'Objectif résilience', q:"Quel type de situation de crise prenez-vous plaisir à résoudre là où d'autres abandonnent ?"},
+  {k:'__roue', titre:"L'Intelligence Émotionnelle", sous:"Mes leviers d'alignement", q:"Cliquez sur les compétences qui résonnent avec vos facilités naturelles (5 au maximum)."},
+  {k:'e1_signature', titre:"L'Alignement et la Vision", sous:"L'héritage", q:"Si vous deviez retenir une seule signature (votre marque personnelle) pour laquelle vous souhaitez que vos clients se souviennent de vous, quelle serait-elle ?"},
+];
+const etapeFaite = e => e.k==='__roue' ? comps().length===5 : val(e.k).trim().length>0;
+function vueEtapes(){
+  const sel = comps(); const nb = ETAPES.filter(etapeFaite).length; const envoye = val('e1_envoye')==='1';
+  const statut = !verrou()
+    ? `<div class="banner" style="background:#E8F5E9;border-color:#bfe3c8">✨ <b>Ton parcours complet est ouvert.</b> Tu peux continuer avec les 4 semaines. <button class="btn sm" data-go="accueil" style="margin-left:8px">Voir mon parcours →</button></div>`
+    : envoye ? `<div class="banner" style="background:#E8F5E9;border-color:#bfe3c8">✓ <b>Tes réponses sont envoyées.</b> L'équipe IMMOLLIA les lit et t'ouvre la suite du parcours (4 semaines, binôme, visio). Tu peux encore les compléter.</div>`
+    : `<div class="banner">🔒 La suite du parcours (4 semaines, binôme, visio) s'ouvre après validation de tes réponses par l'équipe IMMOLLIA.</div>`;
+  return `<div class="card">
+    <div class="eyebrow">Première étape · Bienvenue ${esc(S.user.prenom)}</div>
+    <h1>Révélez votre <span class="acc">Zone de Génie</span> dans l'immobilier en 5 étapes.</h1>
+    <p class="muted">Répondez à votre rythme : tout s'enregistre automatiquement. <b>Vos réponses sont lues par l'équipe IMMOLLIA</b> pour vous ouvrir la suite du parcours.</p>
+    ${statut}
+    <div class="row" style="gap:10px;margin-top:6px"><b>${nb}/5 étapes</b></div><div class="bar"><i style="width:${nb*20}%"></i></div>
+    ${ETAPES.map((e,i)=>`<div class="etape ${etapeFaite(e)?'ok':''}"><div class="num">Étape ${i+1}${etapeFaite(e)?' · ✓':''}</div><h3>${esc(e.titre)} <span class="muted small">(${esc(e.sous)})</span></h3>
+      ${e.k==='__roue'
+        ? `<p style="margin:8px 0 6px">${esc(e.q)}</p><div class="selbox">${sel.length? sel.map(id=>{const c=compById(id); return `<span class="pill" style="background:${c.color};color:#fff">${esc(c.nom)}</span>`;}).join('') : '<span class="muted">Aucune compétence choisie pour l\'instant.</span>'}
+           <div style="margin-top:8px"><button class="btn sm" data-go="roue">${sel.length?'Modifier sur la roue':'Ouvrir la roue →'}</button></div></div>`
+        : champ({k:e.k, q:e.q})}</div>`).join('')}
+    <div style="margin-top:18px">${verrou() ? `<button class="btn" id="envoyer-etapes" ${nb<5?'disabled':''}>${envoye?'Renvoyer mes réponses à l\'équipe IMMOLLIA':'Envoyer mes réponses à l\'équipe IMMOLLIA'}</button>
+      ${nb<5?'<p class="small muted" style="margin-top:6px">Le bouton s\'active quand les 5 étapes sont remplies.</p>':''}` : ''}</div>
   </div>`;
 }
 
@@ -602,7 +648,7 @@ function vueRoue(){
       <div class="wheel" id="wheel">${roueSVG(sel)}</div>
       <div>
         <div class="selbox"><b>Mes ${sel.length}/5 compétences clés</b><div style="margin-top:6px">${sel.length? sel.map(id=>{const c=compById(id); return `<span class="pill" style="background:${c.color};color:#fff">${esc(c.nom)} ✕</span>`;}).join('') : '<span class="muted">Clique sur la roue ou dans la liste.</span>'}</div>
-          ${sel.length===5?`<div style="margin-top:10px"><button class="btn sm" data-go="s2">Noter mes exemples du terrain (semaine 2) →</button></div>`:''}</div>
+          ${verrou() ? `<div style="margin-top:10px"><button class="btn sm" data-go="etapes">← Retour à mes 5 étapes</button></div>` : sel.length===5?`<div style="margin-top:10px"><button class="btn sm" data-go="s2">Noter mes exemples du terrain (semaine 2) →</button></div>`:''}</div>
         <div class="comp-list" id="complist">${FAMILLES.map(f=>`<div class="fam" style="color:${f.c}">${esc(f.nom)}</div>${f.comps.map(c=>`<div class="comp ${sel.includes(c.id)?'sel':''}" data-id="${c.id}"><span class="dot" style="background:${f.c}"></span><div><b>${esc(c.nom)}</b><div class="def">${esc(c.def)}</div></div></div>`).join('')}`).join('')}</div>
       </div>
     </div>
@@ -672,6 +718,7 @@ function pctDe(a){
     t+=ks.length+(n===1?1:0); o+=ks.filter(k=>a.cles.includes(k)).length+(n===1&&a.competences===5?1:0); }
   return Math.round(100*o/Math.max(1,t));
 }
+const nbEtapes = a => ['e1_flow','e1_miroir','e1_impact','e1_signature'].filter(k=>((a.etapes||{})[k]||'').trim()).length + (a.competences===5?1:0);
 function dateFr(d){ if(!d) return 'jamais'; const x=new Date(d.replace(' ','T')); return isNaN(x)?d:x.toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}); }
 function vueAnimatrices(){
   if(!S.anim) return `<div class="card"><h1>Espace <span class="acc">animatrices.</span></h1><p class="muted">Chargement…</p></div>`;
@@ -680,14 +727,13 @@ function vueAnimatrices(){
   const il7=Date.now()-7*864e5;
   const actives=S.anim.filter(a=>a.last_login && new Date(a.last_login.replace(' ','T')).getTime()>il7).length;
   const enGroupe=S.anim.filter(a=>a.groupes.length).length;
-  const fini=S.anim.filter(a=>a.faites.length===4).length;
   return `<div class="card"><h1>Espace <span class="acc">animatrices.</span></h1>
-    <p class="muted">Toutes les inscrites au parcours et leur avancement. Les réponses restent privées : dans un groupe, vous voyez seulement ce que chacune a choisi de partager.</p>
+    <p class="muted">Toutes les inscrites et leur avancement. Lisez les 5 étapes d'une membre puis débloquez son parcours complet. Les réponses des 4 semaines restent privées : dans un groupe, vous voyez seulement ce que chacune a choisi de partager.</p>
     <div class="anim-stats">
       <div><b>${S.anim.length}</b><span class="small muted">inscrites</span></div>
       <div><b>${actives}</b><span class="small muted">connectées ces 7 jours</span></div>
       <div><b>${enGroupe}</b><span class="small muted">en binôme ou trinôme</span></div>
-      <div><b>${fini}</b><span class="small muted">parcours terminés</span></div>
+      <div><b>${S.anim.filter(a=>a.envoye && !a.debloque && !a.admin).length}</b><span class="small muted">5 étapes à valider</span></div>
     </div>
     <input type="text" id="anim-q" placeholder="Rechercher un nom, une agence, un e-mail…" value="${esc(S.animQ||'')}">
     <div class="anim-list">${liste.map(a=>{ const pc=pctDe(a); return `<div class="anim-row">
@@ -695,7 +741,19 @@ function vueAnimatrices(){
       <div class="small muted">Inscrite le ${dateFr(a.created_at)}<br>Dernière visite : ${dateFr(a.last_login)}</div>
       <div><span class="small"><b>${pc} %</b> rempli · ${a.competences}/5 compétences</span><div class="bar"><i style="width:${pc}%"></i></div>
         <div class="sems">${[1,2,3,4].map(n=>`<span class="${a.faites.includes(n)?'ok':''}">S${n}${a.faites.includes(n)?' ✓':''}</span>`).join('')}</div></div>
-      <div>${a.groupes.length?a.groupes.map(g=>`<button class="btn sec" style="padding:7px 12px;font-size:.8rem" data-grp="${g.id}">${esc(g.nom||'Groupe '+g.code)}</button>`).join(' '):'<span class="small muted">Seule</span>'}</div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start">
+        ${a.admin ? '' : a.debloque ? '<span class="pill ok">Parcours ouvert</span>' : a.envoye ? '<span class="pill mag">5 étapes envoyées</span>' : `<span class="pill">5 étapes : ${nbEtapes(a)}/5</span>`}
+        ${a.admin ? '' : `<button class="btn sec" style="padding:6px 12px;font-size:.8rem" data-lire="${a.id}">${S.animOuvert===a.id?'Fermer':'Lire les 5 étapes'}</button>`}
+        ${a.groupes.map(g=>`<button class="btn sec" style="padding:6px 12px;font-size:.8rem" data-grp="${g.id}">${esc(g.nom||'Groupe '+g.code)}</button>`).join('')}
+      </div>
+      ${S.animOuvert===a.id ? `<div class="anim-detail">
+        ${ETAPES.map((e,i)=>`<div><b>Étape ${i+1} · ${esc(e.titre)}</b>${e.k==='__roue'
+          ? (a.liste_comp.length ? a.liste_comp.map(id=>{const c=compById(id); return c?`<span class="pill" style="background:${c.color};color:#fff;margin:3px 4px 0 0">${esc(c.nom)}</span>`:'';}).join('') : '<span class="muted small">Pas encore choisies.</span>')
+          : `<div style="white-space:pre-wrap">${esc((a.etapes||{})[e.k]||'') || '<span class="muted small">Pas encore de réponse.</span>'}</div>`}</div>`).join('')}
+        <div class="row" style="gap:10px">${a.debloque
+          ? `<button class="btn sec sm" data-debloquer="${a.id}" data-val="0">Refermer le parcours complet</button>`
+          : `<button class="btn sm" data-debloquer="${a.id}" data-val="1">✓ Débloquer le parcours complet pour ${esc(a.prenom)}</button>`}</div>
+      </div>` : ''}
     </div>`; }).join('') || '<p class="muted">Aucune inscrite pour le moment.</p>'}</div></div>`;
 }
 async function chargerAnim(){ try{ S.anim=(await Store.call('admin_adherentes')).adherentes||[]; }catch(e){ toast(e.message,4000); S.anim=[]; } }
@@ -758,9 +816,18 @@ function bind(p){
     document.querySelectorAll('[data-gsem]').forEach(b=>b.onclick=()=>{ S.gsem=+b.dataset.gsem; render(); });
     document.querySelectorAll('textarea[data-note]').forEach(t=>{ let tm; t.oninput=()=>{ clearTimeout(tm); const s=document.querySelector(`.saved[data-nk="${t.dataset.note}"]`); s.textContent='…'; tm=setTimeout(async()=>{ try{ await Store.call('note',{group_id:S.groupe.groupe.id,cible:+t.dataset.note,semaine:S.gsem,texte:t.value}); s.textContent='✓ enregistré'; const i=S.groupe.notes.findIndex(x=>x.auteur===S.user.id&&x.cible===+t.dataset.note&&x.semaine===S.gsem); const n={auteur:S.user.id,cible:+t.dataset.note,semaine:S.gsem,texte:t.value}; if(i>=0) S.groupe.notes[i]=n; else S.groupe.notes.push(n); }catch(e){ toast('⚠ '+e.message,4000); } },700); }; });
   }
+  if(p==='etapes'){
+    // Mise à jour des coches et du bouton sans tout redessiner (sinon le champ perd le curseur)
+    const maj=()=>{ const nb=ETAPES.filter(etapeFaite).length; document.querySelectorAll('.etape').forEach((el,i)=>el.classList.toggle('ok',etapeFaite(ETAPES[i]))); const be=$('#envoyer-etapes'); if(be) be.disabled=nb<5; const bb=document.querySelector('#main .bar i'); if(bb) bb.style.width=(nb*20)+'%'; const nn=document.querySelector('#main .row b'); if(nn) nn.textContent=nb+'/5 étapes'; };
+    document.querySelectorAll('textarea[data-k^="e1_"]').forEach(t=>t.addEventListener('input',()=>{ S.entries[t.dataset.k]=t.value; maj(); }));
+    const be=$('#envoyer-etapes'); if(be) be.onclick=()=>save('e1_envoye','1',()=>{ toast("Merci ! Tes réponses sont envoyées à l'équipe IMMOLLIA ✨"); render(); });
+  }
   if(p==='animatrices'){
     const qi=$('#anim-q'); if(qi) qi.oninput=()=>{ S.animQ=qi.value; const pos=qi.selectionStart; render(); const n=$('#anim-q'); n.focus(); n.setSelectionRange(pos,pos); };
     document.querySelectorAll('[data-grp]').forEach(b=>b.onclick=async()=>{ S.groupeId=+b.dataset.grp; S.groupe=null; await window.go('groupe'); });
+    document.querySelectorAll('[data-lire]').forEach(b=>b.onclick=()=>{ const id=+b.dataset.lire; S.animOuvert = S.animOuvert===id ? 0 : id; render(); });
+    document.querySelectorAll('[data-debloquer]').forEach(b=>b.onclick=async()=>{ const on=b.dataset.val==='1';
+      try{ await Store.call('admin_debloquer',{id:+b.dataset.debloquer, debloque:on}); toast(on?'Parcours complet débloqué ✨':'Parcours complet refermé'); await chargerAnim(); render(); }catch(e){ toast(e.message,4000); } });
   }
   if(p==='profil'){
     oeil();
@@ -790,6 +857,7 @@ function redimensionner(file, taille){
   if(/^#reinit=/.test(location.hash)) Store.setToken('');
   if(Store.token){ try{ const j=await Store.call('me'); S.user=j.user; await charger(); }catch(e){ Store.setToken(''); } }
   const h=location.hash.slice(1); if(S.user && h) S.page=h;
+  if(S.user && verrou() && !PAGES_LIBRES.includes(S.page)) S.page='etapes';
   render();
   if(S.user && S.page==='groupe'){ await chargerGroupe(); render(); }
   if(S.user && S.user.admin && S.page==='animatrices'){ await chargerAnim(); render(); }

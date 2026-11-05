@@ -16,6 +16,9 @@ trinômes en option.
 ## Ce que fait l'application
 
 - **Compte par adhérente**, création protégée par un **code communauté** (remis lors de l'adhésion).
+- **« Mes 5 étapes »** (v1.4) : première interface (3 questions, la roue, la signature). Le reste est grisé tant
+  qu'une animatrice n'a pas débloqué le parcours complet de la membre (colonne `debloque`, onglet Animatrices,
+  où les réponses des 5 étapes sont lisibles ; c'est annoncé à la membre).
 - **Carnet de bord sur 4 semaines** : toutes les questions du carnet papier, enregistrement automatique
   à chaque frappe, barre de progression, case « semaine terminée ».
 - **Roue EQ-i 2.0** interactive : 5 familles, 15 compétences avec leur définition ; on en choisit 5, qui

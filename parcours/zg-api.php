@@ -18,7 +18,7 @@
 // c'est le cas sur immollia.fr), sinon MariaDB/MySQL avec ZG_DB_HOST/NAME/USER/PASS.
 //
 // Appels : POST zg-api.php?action=…  (JSON)  — jeton « Authorization: Bearer … »
-// v1 — 2026-10-16 · v1.2 — 2026-10-27 : SQLite · v1.3 — 2026-11-05 : mot de passe oublié
+// v1 — 2026-10-16 · v1.2 — 2026-10-27 : SQLite · v1.3 — 2026-11-05 : mot de passe oublié · v1.4 : « Mes 5 étapes », parcours débloqué par membre
 // ═══════════════════════════════════════════════════════════════════════════
 
 if (!is_file(__DIR__ . '/config.php')) {
@@ -34,7 +34,7 @@ header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
 
-const ZG_VERSION    = 'v1.3';
+const ZG_VERSION    = 'v1.4';
 const ZG_SESSION_J  = 60;        // durée d'une session (jours)
 const ZG_MAX_CHAMP  = 20000;     // taille max d'une réponse (caractères)
 
@@ -80,6 +80,7 @@ function db(): PDO {
             $pdo->exec('PRAGMA busy_timeout = 5000');
             $pdo->exec('PRAGMA journal_mode = WAL');
             installer_sqlite($pdo);
+            migrer($pdo);
             return $pdo;
         }
         $pdo = new PDO(
@@ -91,7 +92,16 @@ function db(): PDO {
         erreur('Base de données injoignable.', 500);
     }
     installer($pdo);
+    migrer($pdo);
     return $pdo;
+}
+// Colonnes ajoutées après la première installation (bases déjà en service).
+function migrer(PDO $pdo): void {
+    $cols = sqlite()
+        ? array_column($pdo->query('PRAGMA table_info(zg_users)')->fetchAll(), 'name')
+        : array_column($pdo->query('SHOW COLUMNS FROM zg_users')->fetchAll(), 'Field');
+    // v1.4 : parcours complet débloqué membre par membre par une animatrice (avant : seulement « Mes 5 étapes »)
+    if (!in_array('debloque', $cols, true)) $pdo->exec('ALTER TABLE zg_users ADD COLUMN debloque ' . (sqlite() ? 'INTEGER' : 'TINYINT') . ' NOT NULL DEFAULT 0');
 }
 function installer(PDO $pdo): void {
     $pdo->exec("CREATE TABLE IF NOT EXISTS zg_users (
@@ -214,7 +224,7 @@ function est_admin(string $email): bool {
 function utilisateur(): array {
     $t = bearer();
     if ($t === '' || strlen($t) !== 64) erreur('Connexion requise.', 401);
-    $s = db()->prepare('SELECT u.id, u.email, u.prenom, u.nom, u.agence, u.photo, u.actif
+    $s = db()->prepare('SELECT u.id, u.email, u.prenom, u.nom, u.agence, u.photo, u.actif, u.debloque
                         FROM zg_sessions s JOIN zg_users u ON u.id = s.user_id
                         WHERE s.token = ? AND s.expires_at > ?');
     $s->execute([$t, maintenant()]);
@@ -225,8 +235,11 @@ function utilisateur(): array {
     return $u;
 }
 function profil_public(array $u): array {
-    return ['id' => (int)$u['id'], 'prenom' => $u['prenom'], 'nom' => $u['nom'], 'agence' => $u['agence'], 'email' => $u['email'], 'photo' => $u['photo'] ?? null];
+    return ['id' => (int)$u['id'], 'prenom' => $u['prenom'], 'nom' => $u['nom'], 'agence' => $u['agence'], 'email' => $u['email'], 'photo' => $u['photo'] ?? null, 'debloque' => !empty($u['debloque'])];
 }
+// Les 4 semaines et le binôme : réservés aux membres débloquées (et aux animatrices).
+function acces_complet(array $me): bool { return !empty($me['admin']) || !empty($me['debloque']); }
+const ZG_ETAPES = ['e1_flow', 'e1_miroir', 'e1_impact', 'e1_signature'];
 function ouvrir_session(int $uid): string {
     $t = bin2hex(random_bytes(32));
     db()->prepare('INSERT INTO zg_sessions (token, user_id, expires_at) VALUES (?, ?, ?)')
@@ -267,7 +280,7 @@ if ($action === 'register') {
     $db->prepare('INSERT INTO zg_users (email, password_hash, prenom, nom, agence) VALUES (?,?,?,?,?)')
        ->execute([$email, password_hash($pass, PASSWORD_DEFAULT), mb_substr($prenom, 0, 80), mb_substr($nom, 0, 80), mb_substr($agence, 0, 120)]);
     $uid = (int)$db->lastInsertId();
-    rep(200, ['ok' => true, 'token' => ouvrir_session($uid), 'user' => ['id' => $uid, 'email' => $email, 'prenom' => $prenom, 'nom' => $nom, 'agence' => $agence, 'admin' => est_admin($email)]]);
+    rep(200, ['ok' => true, 'token' => ouvrir_session($uid), 'user' => ['id' => $uid, 'email' => $email, 'prenom' => $prenom, 'nom' => $nom, 'agence' => $agence, 'debloque' => false, 'admin' => est_admin($email)]]);
 }
 
 if ($action === 'login') {
@@ -378,6 +391,7 @@ if ($action === 'sauver') {
     $n = 0;
     foreach ($entries as $k => $v) {
         if (!cle_valide((string)$k)) continue;
+        if (!acces_complet($me) && $k !== 's1_competences' && preg_match('/^(s[1-4]_|fait_s|partage_s)/', $k)) continue;
         $v = is_string($v) ? $v : json_encode($v, JSON_UNESCAPED_UNICODE);
         if (mb_strlen($v) > ZG_MAX_CHAMP) $v = mb_substr($v, 0, ZG_MAX_CHAMP);
         $st->execute([$me['id'], $k, $v, maintenant()]); $n++;
@@ -409,6 +423,7 @@ function membre_de(PDO $db, array $me, int $gid): bool {
 if ($action === 'groupes') rep(200, ['ok' => true, 'groupes' => mes_groupes($db, $me)]);
 
 if ($action === 'groupe_creer') {
+    if (!acces_complet($me)) erreur('Le binôme s\'ouvre avec le parcours complet, après validation par l\'équipe IMMOLLIA.', 403);
     $nom = trim((string)($body['nom'] ?? ''));
     if ($nom === '') $nom = 'Binôme de ' . $me['prenom'];
     $alpha = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -424,6 +439,7 @@ if ($action === 'groupe_creer') {
 }
 
 if ($action === 'groupe_rejoindre') {
+    if (!acces_complet($me)) erreur('Le binôme s\'ouvre avec le parcours complet, après validation par l\'équipe IMMOLLIA.', 403);
     $code = strtoupper(trim((string)($body['code'] ?? '')));
     $s = $db->prepare('SELECT id FROM zg_groups WHERE code = ?'); $s->execute([$code]);
     $g = $s->fetch();
@@ -503,6 +519,10 @@ if ($action === 'admin_adherentes') {
     $cles = [];
     foreach ($db->query("SELECT user_id, cle, valeur FROM zg_entries WHERE valeur <> ''") as $r) {
         $uid = (int)$r['user_id'];
+        // « Mes 5 étapes » : réponses lisibles par les animatrices (annoncé aux membres sur la page)
+        if (in_array($r['cle'], ZG_ETAPES, true)) { $cles[$uid]['etapes'][$r['cle']] = $r['valeur']; continue; }
+        if ($r['cle'] === 'e1_envoye') { $cles[$uid]['envoye'] = $r['valeur'] === '1'; continue; }
+        if ($r['cle'] === 's1_competences') { $cles[$uid]['liste_comp'] = json_decode($r['valeur'], true) ?: []; }
         if (preg_match('/^fait_s([1-4])$/', $r['cle'], $m)) { if ($r['valeur'] === '1') $cles[$uid]['faites'][] = (int)$m[1]; continue; }
         if ($r['cle'] === 's1_competences') { $c = json_decode($r['valeur'], true); $cles[$uid]['competences'] = is_array($c) ? count($c) : 0; continue; }
         if (preg_match('/^s[1-4]_/', $r['cle'])) $cles[$uid]['cles'][] = $r['cle'];
@@ -512,16 +532,23 @@ if ($action === 'admin_adherentes') {
         $grp[(int)$r['user_id']][] = ['id' => (int)$r['id'], 'nom' => $r['nom'], 'code' => $r['code']];
     }
     $out = [];
-    foreach ($db->query('SELECT id, prenom, nom, agence, email, created_at, last_login FROM zg_users ORDER BY created_at DESC') as $u) {
+    foreach ($db->query('SELECT id, prenom, nom, agence, email, photo, debloque, created_at, last_login FROM zg_users ORDER BY created_at DESC') as $u) {
         $uid = (int)$u['id'];
         $faites = $cles[$uid]['faites'] ?? []; sort($faites);
         $out[] = profil_public($u) + [
             'created_at' => $u['created_at'], 'last_login' => $u['last_login'], 'admin' => est_admin($u['email']),
             'cles' => $cles[$uid]['cles'] ?? [], 'competences' => $cles[$uid]['competences'] ?? 0,
             'faites' => $faites, 'groupes' => $grp[$uid] ?? [],
+            'etapes' => $cles[$uid]['etapes'] ?? (object)[], 'liste_comp' => $cles[$uid]['liste_comp'] ?? [], 'envoye' => $cles[$uid]['envoye'] ?? false,
         ];
     }
     rep(200, ['ok' => true, 'adherentes' => $out]);
+}
+
+if ($action === 'admin_debloquer') {
+    if (!$me['admin']) erreur('Réservé aux animatrices.', 403);
+    $db->prepare('UPDATE zg_users SET debloque = ? WHERE id = ?')->execute([empty($body['debloque']) ? 0 : 1, (int)($body['id'] ?? 0)]);
+    rep(200, ['ok' => true]);
 }
 
 erreur('Action inconnue.', 404);
