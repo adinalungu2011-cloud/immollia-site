@@ -70,6 +70,8 @@ $entetes = "From: IMMOLLIA <contact@immollia.fr>\r\n"
          . "MIME-Version: 1.0\r\n"
          . "Content-Type: text/plain; charset=UTF-8\r\n"
          . "Content-Transfer-Encoding: 8bit\r\n";
-@mail('contact@immollia.fr', mb_encode_mimeheader($sujet, 'UTF-8'), $corps, $entetes);
+// Copie à adina@adinaimmobilier.fr : tant que o2switch garde chez lui les e-mails pour immollia.fr
+// (la boîte contact@immollia.fr est chez OVH), seule cette copie arrive.
+@mail('contact@immollia.fr, adina@adinaimmobilier.fr', mb_encode_mimeheader($sujet, 'UTF-8'), $corps, $entetes);
 
 reponse(true);
