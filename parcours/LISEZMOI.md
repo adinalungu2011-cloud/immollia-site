@@ -16,7 +16,7 @@ trinômes en option.
 ## Ce que fait l'application
 
 - **Compte par adhérente**, création protégée par un **code communauté** (remis lors de l'adhésion).
-- **« Mes 5 étapes »** (v1.4) : première interface (3 questions, la roue, la signature). Le reste est grisé tant
+- **« Autodiagnostic »** (v1.4, les 5 étapes) : première interface (3 questions, la roue, la signature). Le reste est grisé tant
   qu'une animatrice n'a pas débloqué le parcours complet de la membre (colonne `debloque`, onglet Animatrices,
   où les réponses des 5 étapes sont lisibles ; c'est annoncé à la membre).
 - **Carnet de bord sur 4 semaines** : toutes les questions du carnet papier, enregistrement automatique

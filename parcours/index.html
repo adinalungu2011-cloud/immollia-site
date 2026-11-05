@@ -197,7 +197,7 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:30px 16px}
     <img class="logo" src="logo-immollia.webp" alt="Immollia">
     <div class="tagline">Excellence <b>•</b> Compétence <b>•</b> Professionnalisme</div>
     <nav id="nav" class="hidden">
-      <button data-p="etapes">Mes 5 étapes</button>
+      <button data-p="etapes">Autodiagnostic</button>
       <button data-p="accueil">Accueil</button>
       <button data-p="s1">Semaine 1</button>
       <button data-p="s2">Semaine 2</button>
@@ -383,7 +383,7 @@ const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>
 const toast = (m,ms=1800)=>{ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),ms); };
 const val = k => S.entries[k] || '';
 const avatar = (u,cls='') => u && u.photo ? `<img class="avatar ${cls}" src="${u.photo}" alt="">` : `<span class="avatar ${cls}">${esc(((u&&u.prenom)||'?')[0].toUpperCase())}</span>`;
-// Avant validation par une animatrice, la membre n'a accès qu'à « Mes 5 étapes » (+ la roue et son profil).
+// Avant validation par une animatrice, la membre n'a accès qu'à l'« Autodiagnostic » (+ la roue et son profil).
 const verrou = () => Store.mode==='api' && !!S.user && !S.user.admin && !S.user.debloque;
 const PAGES_LIBRES = ['etapes','roue','profil'];
 const comps = () => { try{ const a=JSON.parse(val('s1_competences')||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } };
@@ -417,7 +417,7 @@ function render(){
   document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on', b.dataset.p===S.page));
   document.querySelector('#nav button[data-p=animatrices]').classList.toggle('hidden', !S.user.admin);
   if(verrou() && !PAGES_LIBRES.includes(S.page)) S.page='etapes';
-  document.querySelectorAll('#nav button').forEach(b=>{ const l=verrou() && !PAGES_LIBRES.includes(b.dataset.p) && b.dataset.p!=='animatrices'; b.classList.toggle('lock', l); b.title = l ? "S'ouvre après validation de tes 5 étapes par l'équipe IMMOLLIA" : ''; });
+  document.querySelectorAll('#nav button').forEach(b=>{ const l=verrou() && !PAGES_LIBRES.includes(b.dataset.p) && b.dataset.p!=='animatrices'; b.classList.toggle('lock', l); b.title = l ? "S'ouvre après validation de ton autodiagnostic par l'équipe IMMOLLIA" : ''; });
   const pb=document.querySelector('#nav button[data-p=profil]'); pb.innerHTML=`<span class="row" style="gap:6px">${avatar(S.user).replace('class="avatar','style="width:22px;height:22px;font-size:.65rem" class="avatar')}Profil</span>`;
   const demo = Store.mode==='demo' ? `<div class="banner">🧪 <b>Mode démo</b> : aucun serveur détecté, tes réponses sont stockées uniquement dans ce navigateur. Une fois l'application installée sur immollia.fr, elles seront enregistrées sur ton compte.</div>` : '';
   const p = S.page;
@@ -549,7 +549,7 @@ function vueAccueil(){
   </div>`;
 }
 
-// ── Mes 5 étapes (première interface, avant le parcours complet) ──────────
+// ── Autodiagnostic (première interface, avant le parcours complet) ──────────
 const ETAPES = [
   {k:'e1_flow', titre:'Le Flow Naturel', sous:'Les talents spontanés', q:"Dans votre quotidien, quelle tâche vous fait perdre la notion du temps tout en vous sentant parfaitement à votre place ?"},
   {k:'e1_miroir', titre:'Le Miroir Extérieur', sous:'La reconnaissance des pairs', q:"Pour quel type de sujet ou de problématique vos collègues ou clients viennent-ils spontanément vous demander conseil ?"},
@@ -565,7 +565,7 @@ function vueEtapes(){
     : envoye ? `<div class="banner" style="background:#E8F5E9;border-color:#bfe3c8">✓ <b>Tes réponses sont envoyées.</b> L'équipe IMMOLLIA les lit et t'ouvre la suite du parcours (4 semaines, binôme, visio). Tu peux encore les compléter.</div>`
     : `<div class="banner">🔒 La suite du parcours (4 semaines, binôme, visio) s'ouvre après validation de tes réponses par l'équipe IMMOLLIA.</div>`;
   return `<div class="card">
-    <div class="eyebrow">Première étape · Bienvenue ${esc(S.user.prenom)}</div>
+    <div class="eyebrow">Autodiagnostic · Bienvenue ${esc(S.user.prenom)}</div>
     <h1>Révélez votre <span class="acc">Zone de Génie</span> dans l'immobilier en 5 étapes.</h1>
     <p class="muted">Répondez à votre rythme : tout s'enregistre automatiquement. <b>Vos réponses sont lues par l'équipe IMMOLLIA</b> pour vous ouvrir la suite du parcours.</p>
     ${statut}
@@ -648,7 +648,7 @@ function vueRoue(){
       <div class="wheel" id="wheel">${roueSVG(sel)}</div>
       <div>
         <div class="selbox"><b>Mes ${sel.length}/5 compétences clés</b><div style="margin-top:6px">${sel.length? sel.map(id=>{const c=compById(id); return `<span class="pill" style="background:${c.color};color:#fff">${esc(c.nom)} ✕</span>`;}).join('') : '<span class="muted">Clique sur la roue ou dans la liste.</span>'}</div>
-          ${verrou() ? `<div style="margin-top:10px"><button class="btn sm" data-go="etapes">← Retour à mes 5 étapes</button></div>` : sel.length===5?`<div style="margin-top:10px"><button class="btn sm" data-go="s2">Noter mes exemples du terrain (semaine 2) →</button></div>`:''}</div>
+          ${verrou() ? `<div style="margin-top:10px"><button class="btn sm" data-go="etapes">← Retour à l'autodiagnostic</button></div>` : sel.length===5?`<div style="margin-top:10px"><button class="btn sm" data-go="s2">Noter mes exemples du terrain (semaine 2) →</button></div>`:''}</div>
         <div class="comp-list" id="complist">${FAMILLES.map(f=>`<div class="fam" style="color:${f.c}">${esc(f.nom)}</div>${f.comps.map(c=>`<div class="comp ${sel.includes(c.id)?'sel':''}" data-id="${c.id}"><span class="dot" style="background:${f.c}"></span><div><b>${esc(c.nom)}</b><div class="def">${esc(c.def)}</div></div></div>`).join('')}`).join('')}</div>
       </div>
     </div>
@@ -728,12 +728,12 @@ function vueAnimatrices(){
   const actives=S.anim.filter(a=>a.last_login && new Date(a.last_login.replace(' ','T')).getTime()>il7).length;
   const enGroupe=S.anim.filter(a=>a.groupes.length).length;
   return `<div class="card"><h1>Espace <span class="acc">animatrices.</span></h1>
-    <p class="muted">Toutes les inscrites et leur avancement. Lisez les 5 étapes d'une membre puis débloquez son parcours complet. Les réponses des 4 semaines restent privées : dans un groupe, vous voyez seulement ce que chacune a choisi de partager.</p>
+    <p class="muted">Toutes les inscrites et leur avancement. Lisez l'autodiagnostic d'une membre puis débloquez son parcours complet. Les réponses des 4 semaines restent privées : dans un groupe, vous voyez seulement ce que chacune a choisi de partager.</p>
     <div class="anim-stats">
       <div><b>${S.anim.length}</b><span class="small muted">inscrites</span></div>
       <div><b>${actives}</b><span class="small muted">connectées ces 7 jours</span></div>
       <div><b>${enGroupe}</b><span class="small muted">en binôme ou trinôme</span></div>
-      <div><b>${S.anim.filter(a=>a.envoye && !a.debloque && !a.admin).length}</b><span class="small muted">5 étapes à valider</span></div>
+      <div><b>${S.anim.filter(a=>a.envoye && !a.debloque && !a.admin).length}</b><span class="small muted">autodiagnostics à valider</span></div>
     </div>
     <input type="text" id="anim-q" placeholder="Rechercher un nom, une agence, un e-mail…" value="${esc(S.animQ||'')}">
     <div class="anim-list">${liste.map(a=>{ const pc=pctDe(a); return `<div class="anim-row">
@@ -742,8 +742,8 @@ function vueAnimatrices(){
       <div><span class="small"><b>${pc} %</b> rempli · ${a.competences}/5 compétences</span><div class="bar"><i style="width:${pc}%"></i></div>
         <div class="sems">${[1,2,3,4].map(n=>`<span class="${a.faites.includes(n)?'ok':''}">S${n}${a.faites.includes(n)?' ✓':''}</span>`).join('')}</div></div>
       <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start">
-        ${a.admin ? '' : a.debloque ? '<span class="pill ok">Parcours ouvert</span>' : a.envoye ? '<span class="pill mag">5 étapes envoyées</span>' : `<span class="pill">5 étapes : ${nbEtapes(a)}/5</span>`}
-        ${a.admin ? '' : `<button class="btn sec" style="padding:6px 12px;font-size:.8rem" data-lire="${a.id}">${S.animOuvert===a.id?'Fermer':'Lire les 5 étapes'}</button>`}
+        ${a.admin ? '' : a.debloque ? '<span class="pill ok">Parcours ouvert</span>' : a.envoye ? '<span class="pill mag">Autodiagnostic envoyé</span>' : `<span class="pill">Autodiagnostic : ${nbEtapes(a)}/5</span>`}
+        ${a.admin ? '' : `<button class="btn sec" style="padding:6px 12px;font-size:.8rem" data-lire="${a.id}">${S.animOuvert===a.id?'Fermer':'Lire l\'autodiagnostic'}</button>`}
         ${a.groupes.map(g=>`<button class="btn sec" style="padding:6px 12px;font-size:.8rem" data-grp="${g.id}">${esc(g.nom||'Groupe '+g.code)}</button>`).join('')}
       </div>
       ${S.animOuvert===a.id ? `<div class="anim-detail">
