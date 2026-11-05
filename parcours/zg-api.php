@@ -34,7 +34,7 @@ header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
 
-const ZG_VERSION    = 'v1.5';
+const ZG_VERSION    = 'v1.6';
 const ZG_SESSION_J  = 60;        // durée d'une session (jours)
 const ZG_MAX_CHAMP  = 20000;     // taille max d'une réponse (caractères)
 
@@ -242,9 +242,12 @@ function acces_complet(array $me): bool { return !empty($me['admin']) || !empty(
 const ZG_ETAPES = ['e1_flow', 'e1_miroir', 'e1_impact', 'e1_signature'];
 
 // ─── E-mails ──────────────────────────────────────────────────────────────
-// Destinataires des alertes « équipe » (nouvelle inscription, autodiagnostic à valider).
-// Copie à adina@ : o2switch garde chez lui les e-mails pour immollia.fr (la boîte contact@ est chez OVH).
-if (!defined('ZG_NOTIF')) define('ZG_NOTIF', 'contact@immollia.fr, adina@adinaimmobilier.fr');
+// Destinataires des alertes « équipe » (nouvelle inscription, autodiagnostic à valider) : toutes les animatrices
+// (ZG_ADMINS de config.php, jamais écrit dans le dépôt), plus adina@ car o2switch garde chez lui les e-mails
+// pour immollia.fr (la boîte contact@ est chez OVH).
+if (!defined('ZG_NOTIF')) define('ZG_NOTIF', implode(', ', array_unique(array_merge(
+    array_filter(array_map('trim', explode(',', defined('ZG_ADMINS') ? ZG_ADMINS : ''))),
+    ['contact@immollia.fr', 'adina@adinaimmobilier.fr']))));
 function url_parcours(): string {
     return 'https://' . preg_replace('/[^a-z0-9.\-]/i', '', $_SERVER['HTTP_HOST'] ?? 'www.immollia.fr')
          . rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/parcours/zg-api.php'), '/') . '/';
