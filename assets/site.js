@@ -112,4 +112,18 @@
       if (j && j.membres) nbMembres.forEach(function (el) { el.textContent = j.membres; });
     }, function () {});
   }
+  // Vidéos YouTube : le lecteur (youtube-nocookie) n'est chargé qu'au clic
+  document.querySelectorAll('[data-youtube]').forEach(function (box) {
+    var lien = box.querySelector('a');
+    if (!lien) return;
+    lien.addEventListener('click', function (e) {
+      e.preventDefault();
+      var f = document.createElement('iframe');
+      f.src = 'https://www.youtube-nocookie.com/embed/' + box.getAttribute('data-youtube') + '?autoplay=1&rel=0';
+      f.title = lien.getAttribute('aria-label') || 'Vidéo';
+      f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+      f.allowFullscreen = true;
+      box.replaceChildren(f);
+    });
+  });
 })();
