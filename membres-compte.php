@@ -3,7 +3,7 @@
 // = membres déjà présentes avant le site + chaque nouvelle inscription (une fois par adresse e-mail).
 // Ne sont pas comptés : les essais (prénom ou nom contenant « test ») et les 5 membres fondatrices,
 // déjà incluses dans le chiffre de départ (reconnues par prénom + nom, accents et tirets ignorés).
-const IMMOLLIA_MEMBRES_AVANT_SITE = 48; // à ajuster à la main si besoin
+const IMMOLLIA_MEMBRES_AVANT_SITE = 40; // à ajuster à la main si besoin
 const IMMOLLIA_FONDATRICES = [
     ['adina', 'lungu'], ['anne', 'boucaut'], ['anne', 'basso'], ['audrey', 'morvan'],
     ['elodie', 'mauge'], ['emilie', 'viala'],
